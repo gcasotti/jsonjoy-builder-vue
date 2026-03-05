@@ -8,7 +8,6 @@ A modern, Vue 3 + PrimeVue visual JSON Schema editor for creating and manipulati
 
 **Repository**: https://github.com/gcasotti/jsonjoy-builder-vue
 
-[![NPM Downloads](https://img.shields.io/npm/dw/jsonjoy-builder-vue)](https://www.npmjs.com/package/jsonjoy-builder-vue)
 [![NPM Version](https://img.shields.io/npm/v/jsonjoy-builder-vue)](https://www.npmjs.com/package/jsonjoy-builder-vue)
 [![NPM License](https://img.shields.io/npm/l/jsonjoy-builder-vue)](https://www.npmjs.com/package/jsonjoy-builder-vue)
 
