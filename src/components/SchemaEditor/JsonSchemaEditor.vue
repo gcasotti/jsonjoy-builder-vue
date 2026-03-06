@@ -3,7 +3,10 @@ import { Maximize2 } from "lucide-vue-next";
 import { ref, watch } from "vue";
 import Tabs from "../../components/ui/Tabs.vue";
 import { useTranslation } from "../../hooks/use-translation.ts";
-import { createSchemaStore, provideSchemaStore } from "../../hooks/useSchemaStore.ts";
+import {
+  createSchemaStore,
+  provideSchemaStore,
+} from "../../hooks/useSchemaStore.ts";
 import { cn } from "../../lib/utils.ts";
 import type { JSONSchema } from "../../types/jsonSchema.ts";
 import JsonSchemaVisualizer from "./JsonSchemaVisualizer.vue";
@@ -61,7 +64,9 @@ const store = createSchemaStore(props.schema, (newSchema) => {
     pendingEmit = null;
     emit("update:schema", newSchema);
     // Reset the skip flag AFTER the next Vue flush processes the prop update
-    setTimeout(() => { skipNextWatch = false; }, 0);
+    setTimeout(() => {
+      skipNextWatch = false;
+    }, 0);
   }, 0);
 });
 
@@ -93,7 +98,8 @@ const toggleFullscreen = () => {
   isFullscreen.value = !isFullscreen.value;
 };
 
-const fullscreenClass = () => (isFullscreen.value ? "fixed inset-0 z-50 bg-background" : "");
+const fullscreenClass = () =>
+  isFullscreen.value ? "fixed inset-0 z-50 bg-background" : "";
 
 const handleMouseDown = (e: MouseEvent) => {
   e.preventDefault();
@@ -105,7 +111,8 @@ const handleMouseDown = (e: MouseEvent) => {
 const handleMouseMove = (e: MouseEvent) => {
   if (!isDragging.value || !containerRef.value) return;
   const containerRect = containerRef.value.getBoundingClientRect();
-  const newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+  const newWidth =
+    ((e.clientX - containerRect.left) / containerRect.width) * 100;
   if (newWidth >= 20 && newWidth <= 80) {
     leftPanelWidth.value = newWidth;
   }

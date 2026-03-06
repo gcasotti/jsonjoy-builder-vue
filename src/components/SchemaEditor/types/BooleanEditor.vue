@@ -30,8 +30,10 @@ const enumValues = () =>
   withObjectSchema(props.schema, (s) => s.enum as boolean[] | undefined, null);
 
 const hasRestrictions = () => Array.isArray(enumValues());
-const allowsTrue = () => !hasRestrictions() || enumValues()?.includes(true) || false;
-const allowsFalse = () => !hasRestrictions() || enumValues()?.includes(false) || false;
+const allowsTrue = () =>
+  !hasRestrictions() || enumValues()?.includes(true) || false;
+const allowsFalse = () =>
+  !hasRestrictions() || enumValues()?.includes(false) || false;
 
 const handleAllowedChange = (value: boolean, allowed: boolean) => {
   let newEnum: boolean[] | undefined;

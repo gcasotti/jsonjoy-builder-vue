@@ -7,8 +7,15 @@ import ButtonToggle from "../../components/ui/ButtonToggle.vue";
 import { useTranslation } from "../../hooks/use-translation.ts";
 import { useSchemaStore } from "../../hooks/useSchemaStore.ts";
 import { cn } from "../../lib/utils.ts";
-import type { JSONSchema, ObjectJSONSchema, SchemaType } from "../../types/jsonSchema.ts";
-import { getSchemaDescription, withObjectSchema } from "../../types/jsonSchema.ts";
+import type {
+  JSONSchema,
+  ObjectJSONSchema,
+  SchemaType,
+} from "../../types/jsonSchema.ts";
+import {
+  getSchemaDescription,
+  withObjectSchema,
+} from "../../types/jsonSchema.ts";
 import type { ValidationTreeNode } from "../../types/validation.ts";
 import TypeDropdown from "./TypeDropdown.vue";
 import TypeEditor from "./TypeEditor.vue";
@@ -72,7 +79,9 @@ const handleDescSubmit = () => {
   if (trimmedDesc !== getSchemaDescription(props.schema)) {
     // Update the property schema with the new description
     const currentSchema = store.getAtPath([...props.path, props.name]);
-    const plain = JSON.parse(JSON.stringify(currentSchema ?? { type: "object" }));
+    const plain = JSON.parse(
+      JSON.stringify(currentSchema ?? { type: "object" }),
+    );
     plain.description = trimmedDesc || undefined;
     store.updateProperty(props.path, props.name, plain);
   } else {

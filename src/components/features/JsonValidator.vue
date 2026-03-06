@@ -6,7 +6,10 @@ import Dialog from "../../components/ui/Dialog.vue";
 import MonacoEditor from "../../components/ui/MonacoEditor.vue";
 import { useTranslation } from "../../hooks/use-translation.ts";
 import type { JSONSchema } from "../../types/jsonSchema.ts";
-import { validateJson, type ValidationResult } from "../../utils/jsonValidator.ts";
+import {
+  validateJson,
+  type ValidationResult,
+} from "../../utils/jsonValidator.ts";
 
 const props = withDefaults(
   defineProps<{

@@ -6,11 +6,20 @@ export { default as JsonValidator } from "./components/features/JsonValidator.vu
 export { default as SchemaInferencer } from "./components/features/SchemaInferencer.vue";
 
 // Composables
-export { useTranslation, provideTranslation, TranslationKey } from "./i18n/translation-context.ts";
+export {
+  useTranslation,
+  provideTranslation,
+  TranslationKey,
+} from "./i18n/translation-context.ts";
 export { useMonacoTheme } from "./hooks/use-monaco-theme.ts";
 
 // Types
-export type { JSONSchema, ObjectJSONSchema, SchemaType, NewField } from "./types/jsonSchema.ts";
+export type {
+  JSONSchema,
+  ObjectJSONSchema,
+  SchemaType,
+  NewField,
+} from "./types/jsonSchema.ts";
 export type { Translation } from "./i18n/translation-keys.ts";
 
 // i18n

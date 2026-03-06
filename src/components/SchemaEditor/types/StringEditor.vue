@@ -7,7 +7,10 @@ import Select from "../../../components/ui/Select.vue";
 import { useTranslation } from "../../../hooks/use-translation.ts";
 import { cn } from "../../../lib/utils.ts";
 import type { ObjectJSONSchema } from "../../../types/jsonSchema.ts";
-import { isBooleanSchema, withObjectSchema } from "../../../types/jsonSchema.ts";
+import {
+  isBooleanSchema,
+  withObjectSchema,
+} from "../../../types/jsonSchema.ts";
 import type { ValidationTreeNode } from "../../../types/validation.ts";
 
 type Property = "enum" | "minLength" | "maxLength" | "pattern" | "format";
@@ -34,16 +37,32 @@ const maxLengthId = useId();
 const patternId = useId();
 const formatId = useId();
 
-const minLength = computed(() => withObjectSchema(props.schema, (s) => s.minLength, undefined));
-const maxLength = computed(() => withObjectSchema(props.schema, (s) => s.maxLength, undefined));
-const pattern = computed(() => withObjectSchema(props.schema, (s) => s.pattern, undefined));
-const format = computed(() => withObjectSchema(props.schema, (s) => s.format, undefined));
-const enumValues = computed(() => withObjectSchema(props.schema, (s) => (s.enum as string[]) || [], []));
+const minLength = computed(() =>
+  withObjectSchema(props.schema, (s) => s.minLength, undefined),
+);
+const maxLength = computed(() =>
+  withObjectSchema(props.schema, (s) => s.maxLength, undefined),
+);
+const pattern = computed(() =>
+  withObjectSchema(props.schema, (s) => s.pattern, undefined),
+);
+const format = computed(() =>
+  withObjectSchema(props.schema, (s) => s.format, undefined),
+);
+const enumValues = computed(() =>
+  withObjectSchema(props.schema, (s) => (s.enum as string[]) || [], []),
+);
 
 const handleValidationChange = (property: Property, value: unknown) => {
-  const baseSchema = isBooleanSchema(props.schema) ? { type: "string" as const } : JSON.parse(JSON.stringify(props.schema));
+  const baseSchema = isBooleanSchema(props.schema)
+    ? { type: "string" as const }
+    : JSON.parse(JSON.stringify(props.schema));
   const { type: _, description: __, ...validationProps } = baseSchema;
-  const updatedValidation: ObjectJSONSchema = { ...validationProps, type: "string", [property]: value };
+  const updatedValidation: ObjectJSONSchema = {
+    ...validationProps,
+    type: "string",
+    [property]: value,
+  };
   emit("change", updatedValidation);
 };
 
@@ -59,7 +78,9 @@ const handleRemoveEnumValue = (index: number) => {
   const newEnumValues = [...enumValues.value];
   newEnumValues.splice(index, 1);
   if (newEnumValues.length === 0) {
-    const baseSchema = isBooleanSchema(props.schema) ? { type: "string" as const } : JSON.parse(JSON.stringify(props.schema));
+    const baseSchema = isBooleanSchema(props.schema)
+      ? { type: "string" as const }
+      : JSON.parse(JSON.stringify(props.schema));
     if (!isBooleanSchema(baseSchema) && "enum" in baseSchema) {
       const { enum: _, ...rest } = baseSchema;
       emit("change", rest as ObjectJSONSchema);
@@ -71,20 +92,35 @@ const handleRemoveEnumValue = (index: number) => {
   }
 };
 
-const minMaxError = computed(() =>
-  props.validationNode?.validation.errors?.find((err) => err.path[0] === "length")?.message,
+const minMaxError = computed(
+  () =>
+    props.validationNode?.validation.errors?.find(
+      (err) => err.path[0] === "length",
+    )?.message,
 );
-const minLengthError = computed(() =>
-  props.validationNode?.validation.errors?.find((err) => err.path[0] === "minLength")?.message,
+const minLengthError = computed(
+  () =>
+    props.validationNode?.validation.errors?.find(
+      (err) => err.path[0] === "minLength",
+    )?.message,
 );
-const maxLengthError = computed(() =>
-  props.validationNode?.validation.errors?.find((err) => err.path[0] === "maxLength")?.message,
+const maxLengthError = computed(
+  () =>
+    props.validationNode?.validation.errors?.find(
+      (err) => err.path[0] === "maxLength",
+    )?.message,
 );
-const patternError = computed(() =>
-  props.validationNode?.validation.errors?.find((err) => err.path[0] === "pattern")?.message,
+const patternError = computed(
+  () =>
+    props.validationNode?.validation.errors?.find(
+      (err) => err.path[0] === "pattern",
+    )?.message,
 );
-const formatError = computed(() =>
-  props.validationNode?.validation.errors?.find((err) => err.path[0] === "format")?.message,
+const formatError = computed(
+  () =>
+    props.validationNode?.validation.errors?.find(
+      (err) => err.path[0] === "format",
+    )?.message,
 );
 
 const minLengthValue = computed(() => minLength.value ?? "");
@@ -105,13 +141,14 @@ const formatOptions = computed(() => [
   { label: t.stringFormatIpv6, value: "ipv6" },
 ]);
 
-const needsDetail = computed(() =>
-  !props.readOnly ||
-  minLengthValue.value !== "" ||
-  maxLengthValue.value !== "" ||
-  patternValue.value !== "" ||
-  formatValue.value !== "none" ||
-  enumValues.value.length > 0,
+const needsDetail = computed(
+  () =>
+    !props.readOnly ||
+    minLengthValue.value !== "" ||
+    maxLengthValue.value !== "" ||
+    patternValue.value !== "" ||
+    formatValue.value !== "none" ||
+    enumValues.value.length > 0,
 );
 </script>
 

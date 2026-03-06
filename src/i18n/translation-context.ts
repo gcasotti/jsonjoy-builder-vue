@@ -8,7 +8,7 @@ import type { Translation } from "./translation-keys.ts";
  * @internal
  */
 export const TranslationKey: InjectionKey<Ref<Translation>> =
-    Symbol("TranslationContext");
+  Symbol("TranslationContext");
 
 /**
  * Provide a translation context for all descendant components.
@@ -28,8 +28,13 @@ export const TranslationKey: InjectionKey<Ref<Translation>> =
  * lang.value = de // all labels update instantly
  * ```
  */
-export function provideTranslation(translation: Ref<Translation> | Translation) {
-    provide(TranslationKey, isRef(translation) ? translation : ref(translation) as Ref<Translation>);
+export function provideTranslation(
+  translation: Ref<Translation> | Translation,
+) {
+  provide(
+    TranslationKey,
+    isRef(translation) ? translation : (ref(translation) as Ref<Translation>),
+  );
 }
 
 /**
@@ -44,25 +49,29 @@ export function provideTranslation(translation: Ref<Translation> | Translation) 
  * injected values for backwards compatibility with existing test setups.
  */
 export function useTranslation(): Translation {
-    const injected = inject(TranslationKey, undefined);
+  const injected = inject(TranslationKey, undefined);
 
-    // No injection found — use English fallback
-    if (!injected) {
-        return reactive({ ...en }) as Translation;
-    }
+  // No injection found — use English fallback
+  if (!injected) {
+    return reactive({ ...en }) as Translation;
+  }
 
-    // If the injected value is a Ref (from provideTranslation), watch it
-    if (isRef(injected)) {
-        const state = reactive({ ...injected.value }) as Translation;
-        watch(injected, (newTranslation) => {
-            const keys = Object.keys(newTranslation) as (keyof Translation)[];
-            for (const key of keys) {
-                (state as any)[key] = newTranslation[key];
-            }
-        }, { immediate: false });
-        return state;
-    }
+  // If the injected value is a Ref (from provideTranslation), watch it
+  if (isRef(injected)) {
+    const state = reactive({ ...injected.value }) as Translation;
+    watch(
+      injected,
+      (newTranslation) => {
+        const keys = Object.keys(newTranslation) as (keyof Translation)[];
+        for (const key of keys) {
+          (state as any)[key] = newTranslation[key];
+        }
+      },
+      { immediate: false },
+    );
+    return state;
+  }
 
-    // Plain object (legacy test setup: provide({ [TranslationKey]: en }))
-    return reactive({ ...(injected as unknown as Translation) }) as Translation;
+  // Plain object (legacy test setup: provide({ [TranslationKey]: en }))
+  return reactive({ ...(injected as unknown as Translation) }) as Translation;
 }

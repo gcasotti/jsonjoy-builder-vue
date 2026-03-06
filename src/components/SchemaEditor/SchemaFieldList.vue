@@ -25,7 +25,9 @@ const parentSchema = computed(() => {
 
 const properties = computed(() => getSchemaProperties(parentSchema.value));
 
-const validationTree = computed(() => buildValidationTree(parentSchema.value, t));
+const validationTree = computed(() =>
+  buildValidationTree(parentSchema.value, t),
+);
 </script>
 
 <template>

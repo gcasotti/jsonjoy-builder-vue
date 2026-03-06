@@ -3,7 +3,13 @@ import PButton from "primevue/button";
 
 withDefaults(
   defineProps<{
-    variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+    variant?:
+      | "default"
+      | "destructive"
+      | "outline"
+      | "secondary"
+      | "ghost"
+      | "link";
     size?: "default" | "sm" | "lg" | "icon";
     type?: "button" | "submit" | "reset";
   }>(),

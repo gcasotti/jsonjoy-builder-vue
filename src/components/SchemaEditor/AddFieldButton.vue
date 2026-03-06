@@ -44,7 +44,8 @@ const handleSubmit = (e: Event) => {
     type: fieldType.value,
     description: fieldDesc.value,
     required: fieldRequired.value,
-    additionalProperties: fieldType.value === "object" ? additionalProperties.value : undefined,
+    additionalProperties:
+      fieldType.value === "object" ? additionalProperties.value : undefined,
   });
 
   fieldName.value = "";

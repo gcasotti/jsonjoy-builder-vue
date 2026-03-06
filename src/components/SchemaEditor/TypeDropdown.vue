@@ -22,7 +22,14 @@ const t = useTranslation();
 const isOpen = ref(false);
 const dropdownRef = ref<HTMLDivElement | null>(null);
 
-const typeOptions: SchemaType[] = ["string", "number", "boolean", "object", "array", "null"];
+const typeOptions: SchemaType[] = [
+  "string",
+  "number",
+  "boolean",
+  "object",
+  "array",
+  "null",
+];
 
 const handleClickOutside = (event: MouseEvent) => {
   if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {

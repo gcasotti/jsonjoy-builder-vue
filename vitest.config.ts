@@ -2,10 +2,10 @@ import vue from "@vitejs/plugin-vue";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
-    plugins: [vue()],
-    test: {
-        environment: "happy-dom",
-        include: ["test/**/*.spec.ts"],
-        globals: true,
-    },
+  plugins: [vue()],
+  test: {
+    environment: "happy-dom",
+    include: ["test/**/*.spec.ts"],
+    globals: true,
+  },
 });

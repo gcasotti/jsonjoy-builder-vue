@@ -1,7 +1,17 @@
 <script setup lang="ts">
 import {
-  Clipboard, Check, ChevronDown, ChevronRight, Code2, GitBranch,
-  Globe, Layers, Menu, Package, Sparkles, Zap,
+  Clipboard,
+  Check,
+  ChevronDown,
+  ChevronRight,
+  Code2,
+  GitBranch,
+  Globe,
+  Layers,
+  Menu,
+  Package,
+  Sparkles,
+  Zap,
 } from "lucide-vue-next";
 import { ref, computed, nextTick } from "vue";
 import { exampleSchema } from "../utils/schemaExample.ts";
@@ -25,10 +35,17 @@ const validatorDialogOpen = ref(false);
 const schemaText = computed(() => JSON.stringify(schema.value, null, 2));
 
 // ── Sidebar ──
-type NavItem = { id: string; label: string; icon?: any; children?: { id: string; label: string }[] };
+type NavItem = {
+  id: string;
+  label: string;
+  icon?: any;
+  children?: { id: string; label: string }[];
+};
 const nav: NavItem[] = [
   {
-    id: "editor", label: "JsonSchemaEditor", icon: Layers,
+    id: "editor",
+    label: "JsonSchemaEditor",
+    icon: Layers,
     children: [
       { id: "editor-basic", label: "Basic" },
       { id: "editor-visual", label: "Visual Only" },
@@ -38,7 +55,9 @@ const nav: NavItem[] = [
     ],
   },
   {
-    id: "infer", label: "SchemaInferencer", icon: Sparkles,
+    id: "infer",
+    label: "SchemaInferencer",
+    icon: Sparkles,
     children: [
       { id: "infer-popup", label: "Popup" },
       { id: "infer-inline", label: "Inline" },
@@ -46,7 +65,9 @@ const nav: NavItem[] = [
     ],
   },
   {
-    id: "validator", label: "JsonValidator", icon: Zap,
+    id: "validator",
+    label: "JsonValidator",
+    icon: Zap,
     children: [
       { id: "validator-popup", label: "Popup" },
       { id: "validator-inline", label: "Inline" },
@@ -57,24 +78,34 @@ const nav: NavItem[] = [
 ];
 
 const active = ref("editor");
-const expanded = ref<Record<string, boolean>>({ editor: true, infer: true, validator: true });
+const expanded = ref<Record<string, boolean>>({
+  editor: true,
+  infer: true,
+  validator: true,
+});
 const mobileNav = ref(false);
 
 const go = (id: string) => {
   active.value = id;
   mobileNav.value = false;
   nextTick(() => {
-    document.getElementById(`section-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document
+      .getElementById(`section-${id}`)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
   });
 };
-const toggle = (id: string) => { expanded.value[id] = !expanded.value[id]; };
+const toggle = (id: string) => {
+  expanded.value[id] = !expanded.value[id];
+};
 
 // ── Copy ──
 const copiedId = ref("");
 const copy = (code: string, id: string) => {
   navigator.clipboard.writeText(code);
   copiedId.value = id;
-  setTimeout(() => { copiedId.value = ""; }, 1500);
+  setTimeout(() => {
+    copiedId.value = "";
+  }, 1500);
 };
 
 // ── i18n ──
@@ -92,11 +123,15 @@ const langs = [
 const currentLang = ref("en");
 const switchLang = (val: string) => {
   currentLang.value = val;
-  import(`../../src/i18n/locales/${val}.ts`).then((m) => { translation.value = m[val]; });
+  import(`../../src/i18n/locales/${val}.ts`).then((m) => {
+    translation.value = m[val];
+  });
 };
 
 // ── Utility demos ──
-const utilInput = ref('{\n  "name": "Alice",\n  "age": 25,\n  "active": true\n}');
+const utilInput = ref(
+  '{\n  "name": "Alice",\n  "age": 25,\n  "active": true\n}',
+);
 const utilOutput = ref("");
 const runInfer = () => {
   try {
@@ -104,7 +139,9 @@ const runInfer = () => {
     import("../../src/lib/schema-inference.ts").then((m) => {
       utilOutput.value = JSON.stringify(m.createSchemaFromJson(obj), null, 2);
     });
-  } catch (e) { utilOutput.value = `Error: ${(e as Error).message}`; }
+  } catch (e) {
+    utilOutput.value = `Error: ${(e as Error).message}`;
+  }
 };
 
 const validUtilInput = ref('{ "name": "Bob", "age": "not a number" }');
@@ -114,7 +151,7 @@ const runValidate = () => {
     const result = m.validateJson(validUtilInput.value, schema.value);
     validUtilOutput.value = result.valid
       ? "✓ Valid"
-      : result.errors!.map(e => `✗ ${e.path}: ${e.message}`).join("\n");
+      : result.errors!.map((e) => `✗ ${e.path}: ${e.message}`).join("\n");
   });
 };
 
@@ -123,24 +160,67 @@ type P = { name: string; type: string; def: string; desc: string };
 type E = { name: string; payload: string; desc: string };
 
 const editorProps: P[] = [
-  { name: "schema",         type: "JSONSchema",  def: "{ type: 'object' }", desc: "The JSON schema to edit (v-model compatible)." },
-  { name: "readOnly",       type: "boolean",     def: "false",              desc: "Disable all editing controls." },
-  { name: "showJsonEditor", type: "boolean",     def: "true",               desc: "Show the Monaco JSON editor panel." },
-  { name: "showFullscreen", type: "boolean",     def: "true",               desc: "Show the fullscreen toggle button." },
+  {
+    name: "schema",
+    type: "JSONSchema",
+    def: "{ type: 'object' }",
+    desc: "The JSON schema to edit (v-model compatible).",
+  },
+  {
+    name: "readOnly",
+    type: "boolean",
+    def: "false",
+    desc: "Disable all editing controls.",
+  },
+  {
+    name: "showJsonEditor",
+    type: "boolean",
+    def: "true",
+    desc: "Show the Monaco JSON editor panel.",
+  },
+  {
+    name: "showFullscreen",
+    type: "boolean",
+    def: "true",
+    desc: "Show the fullscreen toggle button.",
+  },
 ];
 const editorEvents: E[] = [
-  { name: "update:schema", payload: "JSONSchema", desc: "Emitted on every schema change." },
+  {
+    name: "update:schema",
+    payload: "JSONSchema",
+    desc: "Emitted on every schema change.",
+  },
 ];
 const inferProps: P[] = [
-  { name: "visible", type: "boolean | undefined", def: "undefined", desc: "Dialog visibility. Omit for inline mode." },
+  {
+    name: "visible",
+    type: "boolean | undefined",
+    def: "undefined",
+    desc: "Dialog visibility. Omit for inline mode.",
+  },
 ];
 const inferEvents: E[] = [
-  { name: "update:visible",  payload: "boolean",    desc: "Dialog open/close." },
-  { name: "schemaInferred",  payload: "JSONSchema",  desc: "The inferred schema." },
+  { name: "update:visible", payload: "boolean", desc: "Dialog open/close." },
+  {
+    name: "schemaInferred",
+    payload: "JSONSchema",
+    desc: "The inferred schema.",
+  },
 ];
 const validatorProps: P[] = [
-  { name: "schema",  type: "JSONSchema",           def: "—",         desc: "Schema to validate against." },
-  { name: "visible", type: "boolean | undefined",   def: "undefined", desc: "Omit for inline mode." },
+  {
+    name: "schema",
+    type: "JSONSchema",
+    def: "—",
+    desc: "Schema to validate against.",
+  },
+  {
+    name: "visible",
+    type: "boolean | undefined",
+    def: "undefined",
+    desc: "Omit for inline mode.",
+  },
 ];
 const validatorEvents: E[] = [
   { name: "update:visible", payload: "boolean", desc: "Dialog open/close." },

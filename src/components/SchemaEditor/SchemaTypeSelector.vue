@@ -11,11 +11,31 @@ interface TypeOption {
 }
 
 const typeOptions: TypeOption[] = [
-  { id: "string", label: "fieldTypeTextLabel", description: "fieldTypeTextDescription" },
-  { id: "number", label: "fieldTypeNumberLabel", description: "fieldTypeNumberDescription" },
-  { id: "boolean", label: "fieldTypeBooleanLabel", description: "fieldTypeBooleanDescription" },
-  { id: "object", label: "fieldTypeObjectLabel", description: "fieldTypeObjectDescription" },
-  { id: "array", label: "fieldTypeArrayLabel", description: "fieldTypeArrayDescription" },
+  {
+    id: "string",
+    label: "fieldTypeTextLabel",
+    description: "fieldTypeTextDescription",
+  },
+  {
+    id: "number",
+    label: "fieldTypeNumberLabel",
+    description: "fieldTypeNumberDescription",
+  },
+  {
+    id: "boolean",
+    label: "fieldTypeBooleanLabel",
+    description: "fieldTypeBooleanDescription",
+  },
+  {
+    id: "object",
+    label: "fieldTypeObjectLabel",
+    description: "fieldTypeObjectDescription",
+  },
+  {
+    id: "array",
+    label: "fieldTypeArrayLabel",
+    description: "fieldTypeArrayDescription",
+  },
 ];
 
 defineProps<{

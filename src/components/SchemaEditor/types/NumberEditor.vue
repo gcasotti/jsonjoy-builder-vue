@@ -6,10 +6,19 @@ import Label from "../../../components/ui/Label.vue";
 import { useTranslation } from "../../../hooks/use-translation.ts";
 import { cn } from "../../../lib/utils.ts";
 import type { ObjectJSONSchema } from "../../../types/jsonSchema.ts";
-import { isBooleanSchema, withObjectSchema } from "../../../types/jsonSchema.ts";
+import {
+  isBooleanSchema,
+  withObjectSchema,
+} from "../../../types/jsonSchema.ts";
 import type { ValidationTreeNode } from "../../../types/validation.ts";
 
-type Property = "minimum" | "maximum" | "exclusiveMinimum" | "exclusiveMaximum" | "multipleOf" | "enum";
+type Property =
+  | "minimum"
+  | "maximum"
+  | "exclusiveMinimum"
+  | "exclusiveMaximum"
+  | "multipleOf"
+  | "enum";
 
 const props = withDefaults(
   defineProps<{
@@ -36,12 +45,24 @@ const exclusiveMinimumId = useId();
 const exclusiveMaximumId = useId();
 const multipleOfId = useId();
 
-const minimum = computed(() => withObjectSchema(props.schema, (s) => s.minimum, undefined));
-const maximum = computed(() => withObjectSchema(props.schema, (s) => s.maximum, undefined));
-const exclusiveMinimum = computed(() => withObjectSchema(props.schema, (s) => s.exclusiveMinimum, undefined));
-const exclusiveMaximum = computed(() => withObjectSchema(props.schema, (s) => s.exclusiveMaximum, undefined));
-const multipleOf = computed(() => withObjectSchema(props.schema, (s) => s.multipleOf, undefined));
-const enumValues = computed(() => withObjectSchema(props.schema, (s) => (s.enum as number[]) || [], []));
+const minimum = computed(() =>
+  withObjectSchema(props.schema, (s) => s.minimum, undefined),
+);
+const maximum = computed(() =>
+  withObjectSchema(props.schema, (s) => s.maximum, undefined),
+);
+const exclusiveMinimum = computed(() =>
+  withObjectSchema(props.schema, (s) => s.exclusiveMinimum, undefined),
+);
+const exclusiveMaximum = computed(() =>
+  withObjectSchema(props.schema, (s) => s.exclusiveMaximum, undefined),
+);
+const multipleOf = computed(() =>
+  withObjectSchema(props.schema, (s) => s.multipleOf, undefined),
+);
+const enumValues = computed(() =>
+  withObjectSchema(props.schema, (s) => (s.enum as number[]) || [], []),
+);
 
 const handleValidationChange = (property: Property, value: unknown) => {
   const baseProperties: Partial<ObjectJSONSchema> = {
@@ -49,21 +70,31 @@ const handleValidationChange = (property: Property, value: unknown) => {
   };
 
   if (!isBooleanSchema(props.schema)) {
-    if (props.schema.minimum !== undefined) baseProperties.minimum = props.schema.minimum;
-    if (props.schema.maximum !== undefined) baseProperties.maximum = props.schema.maximum;
-    if (props.schema.exclusiveMinimum !== undefined) baseProperties.exclusiveMinimum = props.schema.exclusiveMinimum;
-    if (props.schema.exclusiveMaximum !== undefined) baseProperties.exclusiveMaximum = props.schema.exclusiveMaximum;
-    if (props.schema.multipleOf !== undefined) baseProperties.multipleOf = props.schema.multipleOf;
-    if (props.schema.enum !== undefined) baseProperties.enum = [...(props.schema.enum as unknown[])];
+    if (props.schema.minimum !== undefined)
+      baseProperties.minimum = props.schema.minimum;
+    if (props.schema.maximum !== undefined)
+      baseProperties.maximum = props.schema.maximum;
+    if (props.schema.exclusiveMinimum !== undefined)
+      baseProperties.exclusiveMinimum = props.schema.exclusiveMinimum;
+    if (props.schema.exclusiveMaximum !== undefined)
+      baseProperties.exclusiveMaximum = props.schema.exclusiveMaximum;
+    if (props.schema.multipleOf !== undefined)
+      baseProperties.multipleOf = props.schema.multipleOf;
+    if (props.schema.enum !== undefined)
+      baseProperties.enum = [...(props.schema.enum as unknown[])];
   }
 
   if (value !== undefined) {
     const updatedProperties: Partial<ObjectJSONSchema> = { ...baseProperties };
     if (property === "minimum") updatedProperties.minimum = value as number;
-    else if (property === "maximum") updatedProperties.maximum = value as number;
-    else if (property === "exclusiveMinimum") updatedProperties.exclusiveMinimum = value as number;
-    else if (property === "exclusiveMaximum") updatedProperties.exclusiveMaximum = value as number;
-    else if (property === "multipleOf") updatedProperties.multipleOf = value as number;
+    else if (property === "maximum")
+      updatedProperties.maximum = value as number;
+    else if (property === "exclusiveMinimum")
+      updatedProperties.exclusiveMinimum = value as number;
+    else if (property === "exclusiveMaximum")
+      updatedProperties.exclusiveMaximum = value as number;
+    else if (property === "multipleOf")
+      updatedProperties.multipleOf = value as number;
     else if (property === "enum") updatedProperties.enum = value as unknown[];
     emit("change", updatedProperties as ObjectJSONSchema);
     return;
@@ -89,17 +120,51 @@ const handleAddEnumValue = () => {
 const handleRemoveEnumValue = (index: number) => {
   const newEnumValues = [...enumValues.value];
   newEnumValues.splice(index, 1);
-  handleValidationChange("enum", newEnumValues.length === 0 ? undefined : newEnumValues);
+  handleValidationChange(
+    "enum",
+    newEnumValues.length === 0 ? undefined : newEnumValues,
+  );
 };
 
-const minMaxError = computed(() => props.validationNode?.validation.errors?.find((err) => err.path[0] === "minMax")?.message);
-const redundantMinError = computed(() => props.validationNode?.validation.errors?.find((err) => err.path[0] === "redundantMinimum")?.message);
-const redundantMaxError = computed(() => props.validationNode?.validation.errors?.find((err) => err.path[0] === "redundantMaximum")?.message);
-const enumError = computed(() => props.validationNode?.validation.errors?.find((err) => err.path[0] === "enum")?.message);
-const multipleOfError = computed(() => props.validationNode?.validation.errors?.find((err) => err.path[0] === "multipleOf")?.message);
+const minMaxError = computed(
+  () =>
+    props.validationNode?.validation.errors?.find(
+      (err) => err.path[0] === "minMax",
+    )?.message,
+);
+const redundantMinError = computed(
+  () =>
+    props.validationNode?.validation.errors?.find(
+      (err) => err.path[0] === "redundantMinimum",
+    )?.message,
+);
+const redundantMaxError = computed(
+  () =>
+    props.validationNode?.validation.errors?.find(
+      (err) => err.path[0] === "redundantMaximum",
+    )?.message,
+);
+const enumError = computed(
+  () =>
+    props.validationNode?.validation.errors?.find(
+      (err) => err.path[0] === "enum",
+    )?.message,
+);
+const multipleOfError = computed(
+  () =>
+    props.validationNode?.validation.errors?.find(
+      (err) => err.path[0] === "multipleOf",
+    )?.message,
+);
 
-const hasConstraint = computed(() =>
-  !!minimum.value || !!maximum.value || !!exclusiveMinimum.value || !!exclusiveMaximum.value || !!multipleOf.value || enumValues.value.length > 0,
+const hasConstraint = computed(
+  () =>
+    !!minimum.value ||
+    !!maximum.value ||
+    !!exclusiveMinimum.value ||
+    !!exclusiveMaximum.value ||
+    !!multipleOf.value ||
+    enumValues.value.length > 0,
 );
 </script>
 

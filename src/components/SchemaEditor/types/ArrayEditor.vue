@@ -6,8 +6,14 @@ import Switch from "../../../components/ui/Switch.vue";
 import { useTranslation } from "../../../hooks/use-translation.ts";
 import { getArrayItemsSchema } from "../../../lib/schemaEditor.ts";
 import { cn } from "../../../lib/utils.ts";
-import type { ObjectJSONSchema, SchemaType } from "../../../types/jsonSchema.ts";
-import { isBooleanSchema, withObjectSchema } from "../../../types/jsonSchema.ts";
+import type {
+  ObjectJSONSchema,
+  SchemaType,
+} from "../../../types/jsonSchema.ts";
+import {
+  isBooleanSchema,
+  withObjectSchema,
+} from "../../../types/jsonSchema.ts";
 import type { ValidationTreeNode } from "../../../types/validation.ts";
 import TypeDropdown from "../TypeDropdown.vue";
 import TypeEditor from "../TypeEditor.vue";
@@ -28,22 +34,42 @@ const emit = defineEmits<{
 }>();
 
 const t = useTranslation();
-const minItems = ref<number | undefined>(withObjectSchema(props.schema, (s) => s.minItems, undefined));
-const maxItems = ref<number | undefined>(withObjectSchema(props.schema, (s) => s.maxItems, undefined));
-const uniqueItems = ref(withObjectSchema(props.schema, (s) => s.uniqueItems || false, false));
+const minItems = ref<number | undefined>(
+  withObjectSchema(props.schema, (s) => s.minItems, undefined),
+);
+const maxItems = ref<number | undefined>(
+  withObjectSchema(props.schema, (s) => s.maxItems, undefined),
+);
+const uniqueItems = ref(
+  withObjectSchema(props.schema, (s) => s.uniqueItems || false, false),
+);
 
 const minItemsId = useId();
 const maxItemsId = useId();
 const uniqueItemsId = useId();
 
-const itemsSchema = computed(() => getArrayItemsSchema(props.schema) || { type: "string" });
-
-const itemType = computed(() =>
-  withObjectSchema(itemsSchema.value, (s) => (s.type || "string") as SchemaType, "string" as SchemaType),
+const itemsSchema = computed(
+  () => getArrayItemsSchema(props.schema) || { type: "string" },
 );
 
-const buildValidationProps = (overrides: { minItems?: number; maxItems?: number; uniqueItems?: boolean } = {}) => {
-  const base = isBooleanSchema(props.schema) ? {} : JSON.parse(JSON.stringify(props.schema));
+const itemType = computed(() =>
+  withObjectSchema(
+    itemsSchema.value,
+    (s) => (s.type || "string") as SchemaType,
+    "string" as SchemaType,
+  ),
+);
+
+const buildValidationProps = (
+  overrides: {
+    minItems?: number;
+    maxItems?: number;
+    uniqueItems?: boolean;
+  } = {},
+) => {
+  const base = isBooleanSchema(props.schema)
+    ? {}
+    : JSON.parse(JSON.stringify(props.schema));
   const validationProps: ObjectJSONSchema = {
     type: "array",
     ...base,
@@ -68,7 +94,9 @@ const handleValidationChange = () => {
 };
 
 const handleItemSchemaChange = (updatedItemSchema: ObjectJSONSchema) => {
-  const base = isBooleanSchema(props.schema) ? {} : JSON.parse(JSON.stringify(props.schema));
+  const base = isBooleanSchema(props.schema)
+    ? {}
+    : JSON.parse(JSON.stringify(props.schema));
   emit("change", {
     type: "array",
     ...base,
@@ -78,13 +106,30 @@ const handleItemSchemaChange = (updatedItemSchema: ObjectJSONSchema) => {
 
 const handleItemTypeChange = (newType: SchemaType) => {
   const currentItems = itemsSchema.value;
-  const plain = isBooleanSchema(currentItems) ? {} : JSON.parse(JSON.stringify(currentItems));
+  const plain = isBooleanSchema(currentItems)
+    ? {}
+    : JSON.parse(JSON.stringify(currentItems));
   handleItemSchemaChange({ ...plain, type: newType });
 };
 
-const minMaxError = computed(() => props.validationNode?.validation.errors?.find((err) => err.path[0] === "minmax")?.message);
-const minItemsError = computed(() => props.validationNode?.validation.errors?.find((err) => err.path[0] === "minItems")?.message);
-const maxItemsError = computed(() => props.validationNode?.validation.errors?.find((err) => err.path[0] === "maxItems")?.message);
+const minMaxError = computed(
+  () =>
+    props.validationNode?.validation.errors?.find(
+      (err) => err.path[0] === "minmax",
+    )?.message,
+);
+const minItemsError = computed(
+  () =>
+    props.validationNode?.validation.errors?.find(
+      (err) => err.path[0] === "minItems",
+    )?.message,
+);
+const maxItemsError = computed(
+  () =>
+    props.validationNode?.validation.errors?.find(
+      (err) => err.path[0] === "maxItems",
+    )?.message,
+);
 </script>
 
 <template>

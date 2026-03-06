@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { useTranslation } from "../../hooks/use-translation.ts";
-import type { JSONSchema, ObjectJSONSchema, SchemaType } from "../../types/jsonSchema.ts";
+import type {
+  JSONSchema,
+  ObjectJSONSchema,
+  SchemaType,
+} from "../../types/jsonSchema.ts";
 import { withObjectSchema } from "../../types/jsonSchema.ts";
 import type { ValidationTreeNode } from "../../types/validation.ts";
 
