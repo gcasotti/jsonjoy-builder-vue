@@ -14,6 +14,7 @@ export default defineConfig({
     distPath: {
       root: "dist-demo",
     },
+    assetPrefix: process.env.PUBLIC_BASE_PATH || "/",
   },
   source: {
     entry: {

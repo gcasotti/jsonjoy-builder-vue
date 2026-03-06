@@ -35,6 +35,8 @@ jobs:
 
       # ── Build demo page ──
       - run: npx rsbuild build
+        env:
+          PUBLIC_BASE_PATH: /jsonschema-builder-vue/
 
       # ── Deploy demo to GitHub Pages ──
       - uses: actions/configure-pages@v5
