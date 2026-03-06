@@ -15,6 +15,7 @@ import TypeEditor from "../TypeEditor.vue";
 const props = withDefaults(
   defineProps<{
     schema: import("../../../types/jsonSchema.ts").JSONSchema;
+    path: string[];
     readOnly?: boolean;
     validationNode?: ValidationTreeNode;
     depth?: number;
@@ -42,9 +43,10 @@ const itemType = computed(() =>
 );
 
 const buildValidationProps = (overrides: { minItems?: number; maxItems?: number; uniqueItems?: boolean } = {}) => {
+  const base = isBooleanSchema(props.schema) ? {} : JSON.parse(JSON.stringify(props.schema));
   const validationProps: ObjectJSONSchema = {
     type: "array",
-    ...(isBooleanSchema(props.schema) ? {} : props.schema),
+    ...base,
     minItems: overrides.minItems ?? minItems.value,
     maxItems: overrides.maxItems ?? maxItems.value,
     uniqueItems: (overrides.uniqueItems ?? uniqueItems.value) || undefined,
@@ -66,11 +68,18 @@ const handleValidationChange = () => {
 };
 
 const handleItemSchemaChange = (updatedItemSchema: ObjectJSONSchema) => {
+  const base = isBooleanSchema(props.schema) ? {} : JSON.parse(JSON.stringify(props.schema));
   emit("change", {
     type: "array",
-    ...(isBooleanSchema(props.schema) ? {} : props.schema),
+    ...base,
     items: updatedItemSchema,
   });
+};
+
+const handleItemTypeChange = (newType: SchemaType) => {
+  const currentItems = itemsSchema.value;
+  const plain = isBooleanSchema(currentItems) ? {} : JSON.parse(JSON.stringify(currentItems));
+  handleItemSchemaChange({ ...plain, type: newType });
 };
 
 const minMaxError = computed(() => props.validationNode?.validation.errors?.find((err) => err.path[0] === "minmax")?.message);
@@ -120,15 +129,13 @@ const maxItemsError = computed(() => props.validationNode?.validation.errors?.fi
         <TypeDropdown
           :read-only="readOnly"
           :model-value="itemType"
-          @update:model-value="(newType: SchemaType) => handleItemSchemaChange({
-            ...withObjectSchema(itemsSchema, (s) => s, {}),
-            type: newType,
-          })"
+          @update:model-value="handleItemTypeChange"
         />
       </div>
       <TypeEditor
         :read-only="readOnly"
         :schema="itemsSchema"
+        :path="path"
         :validation-node="validationNode"
         :depth="depth + 1"
         @change="handleItemSchemaChange"

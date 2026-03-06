@@ -14,6 +14,7 @@ type Property = "minimum" | "maximum" | "exclusiveMinimum" | "exclusiveMaximum" 
 const props = withDefaults(
   defineProps<{
     schema: import("../../../types/jsonSchema.ts").JSONSchema;
+    path: string[];
     readOnly?: boolean;
     validationNode?: ValidationTreeNode;
     depth?: number;
@@ -53,7 +54,7 @@ const handleValidationChange = (property: Property, value: unknown) => {
     if (props.schema.exclusiveMinimum !== undefined) baseProperties.exclusiveMinimum = props.schema.exclusiveMinimum;
     if (props.schema.exclusiveMaximum !== undefined) baseProperties.exclusiveMaximum = props.schema.exclusiveMaximum;
     if (props.schema.multipleOf !== undefined) baseProperties.multipleOf = props.schema.multipleOf;
-    if (props.schema.enum !== undefined) baseProperties.enum = props.schema.enum;
+    if (props.schema.enum !== undefined) baseProperties.enum = [...(props.schema.enum as unknown[])];
   }
 
   if (value !== undefined) {

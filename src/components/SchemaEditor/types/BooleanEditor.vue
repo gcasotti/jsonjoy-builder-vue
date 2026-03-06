@@ -10,6 +10,7 @@ import type { ValidationTreeNode } from "../../../types/validation.ts";
 const props = withDefaults(
   defineProps<{
     schema: import("../../../types/jsonSchema.ts").JSONSchema;
+    path: string[];
     readOnly?: boolean;
     validationNode?: ValidationTreeNode;
     depth?: number;

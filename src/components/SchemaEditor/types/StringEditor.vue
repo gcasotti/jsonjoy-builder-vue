@@ -15,6 +15,7 @@ type Property = "enum" | "minLength" | "maxLength" | "pattern" | "format";
 const props = withDefaults(
   defineProps<{
     schema: import("../../../types/jsonSchema.ts").JSONSchema;
+    path: string[];
     readOnly?: boolean;
     validationNode?: ValidationTreeNode;
     depth?: number;
@@ -40,7 +41,7 @@ const format = computed(() => withObjectSchema(props.schema, (s) => s.format, un
 const enumValues = computed(() => withObjectSchema(props.schema, (s) => (s.enum as string[]) || [], []));
 
 const handleValidationChange = (property: Property, value: unknown) => {
-  const baseSchema = isBooleanSchema(props.schema) ? { type: "string" as const } : { ...props.schema };
+  const baseSchema = isBooleanSchema(props.schema) ? { type: "string" as const } : JSON.parse(JSON.stringify(props.schema));
   const { type: _, description: __, ...validationProps } = baseSchema;
   const updatedValidation: ObjectJSONSchema = { ...validationProps, type: "string", [property]: value };
   emit("change", updatedValidation);
@@ -58,7 +59,7 @@ const handleRemoveEnumValue = (index: number) => {
   const newEnumValues = [...enumValues.value];
   newEnumValues.splice(index, 1);
   if (newEnumValues.length === 0) {
-    const baseSchema = isBooleanSchema(props.schema) ? { type: "string" as const } : { ...props.schema };
+    const baseSchema = isBooleanSchema(props.schema) ? { type: "string" as const } : JSON.parse(JSON.stringify(props.schema));
     if (!isBooleanSchema(baseSchema) && "enum" in baseSchema) {
       const { enum: _, ...rest } = baseSchema;
       emit("change", rest as ObjectJSONSchema);
