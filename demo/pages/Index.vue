@@ -226,7 +226,7 @@ lang.value = de  // all labels update instantly`,
         <nav class="px-3 pb-6 space-y-1 text-[13px]">
           <div v-for="item in nav" :key="item.id" class="mb-1">
             <!-- Group header -->
-            <button type="button" @click="item.children ? toggle(item.id) : go(item.id)"
+            <button type="button" @click="item.children ? (expanded[item.id] = true, go(item.id)) : go(item.id)"
               :class="[
                 'w-full flex items-center gap-2 px-2.5 py-2 rounded-lg font-semibold transition-colors',
                 active === item.id || active.startsWith(item.id + '-')
@@ -234,8 +234,10 @@ lang.value = de  // all labels update instantly`,
               ]">
               <component v-if="item.icon" :is="item.icon" :size="15" class="opacity-60" />
               <span class="grow text-left">{{ item.label }}</span>
-              <ChevronDown v-if="item.children && expanded[item.id]" :size="14" class="opacity-40" />
-              <ChevronRight v-else-if="item.children" :size="14" class="opacity-40" />
+              <span v-if="item.children" class="p-0.5 rounded hover:bg-gray-200/60" @click.stop="toggle(item.id)">
+                <ChevronDown v-if="expanded[item.id]" :size="14" class="opacity-40" />
+                <ChevronRight v-else :size="14" class="opacity-40" />
+              </span>
             </button>
             <!-- Children -->
             <div v-if="item.children && expanded[item.id]" class="ml-6 mt-0.5 space-y-0.5 border-l border-gray-200 pl-2.5">
