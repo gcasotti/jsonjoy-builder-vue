@@ -3,6 +3,8 @@ import {
   CheckCircle,
   CirclePlus,
   Code,
+  Clipboard,
+  Check,
   Eye,
   EyeOff,
   GitBranch,
@@ -60,6 +62,34 @@ const authorLinks = [
   { href: "https://github.com/gcasotti/jsonjoy-builder-vue", text: "GitHub", icon: GitBranch, target: "_blank", rel: "nofollow noopener noreferrer" },
   { href: "https://www.npmjs.com/package/jsonjoy-builder-vue", text: "NPM", icon: Package, target: "_blank", rel: "nofollow noopener noreferrer" },
 ];
+
+// Code snippets to show alongside the demo
+const codeSnippets = [
+  {
+    label: "Basic",
+    code: `<JsonSchemaEditor v-model:schema="schema" />`,
+  },
+  {
+    label: "Read-only",
+    code: `<JsonSchemaEditor v-model:schema="schema" :read-only="true" />`,
+  },
+  {
+    label: "i18n",
+    code: `import { provideTranslation } from 'jsonjoy-builder-vue'
+import { de } from 'jsonjoy-builder-vue/i18n'
+
+provideTranslation(de)`,
+  },
+];
+
+const activeSnippet = ref(0);
+const copied = ref(false);
+
+const copySnippet = () => {
+  navigator.clipboard.writeText(codeSnippets[activeSnippet.value].code);
+  copied.value = true;
+  setTimeout(() => { copied.value = false; }, 1500);
+};
 </script>
 
 <template>
@@ -68,31 +98,64 @@ const authorLinks = [
     <header class="sticky top-0 z-20 bg-background/80 backdrop-blur-md border-b border-border/40">
       <div class="container mx-auto px-4 lg:px-8 h-14 flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <span class="text-lg font-semibold tracking-tight">jsonjoy-builder</span>
-          <span class="hidden sm:inline text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">vue</span>
+          <span class="text-lg font-semibold tracking-tight">jsonjoy-builder-vue</span>
         </div>
-        <div class="flex items-center gap-2">
-          <div class="flex items-center gap-1">
-            <template v-for="(link, index) in authorLinks" :key="link.href">
-              <a
-                :href="link.href"
-                class="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 px-1.5 py-1"
-                :target="link.target"
-                :rel="link.rel"
-              >
-                <component :is="link.icon" :size="13" />
-                <span class="hidden md:inline">{{ link.text }}</span>
-              </a>
-              <span v-if="index < authorLinks.length - 1" class="text-border">·</span>
-            </template>
-          </div>
+        <div class="flex items-center gap-1">
+          <template v-for="(link, index) in authorLinks" :key="link.href">
+            <a
+              :href="link.href"
+              class="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 px-1.5 py-1"
+              :target="link.target"
+              :rel="link.rel"
+            >
+              <component :is="link.icon" :size="13" />
+              <span class="hidden md:inline">{{ link.text }}</span>
+            </a>
+            <span v-if="index < authorLinks.length - 1" class="text-border">·</span>
+          </template>
         </div>
       </div>
     </header>
 
-    <main class="container mx-auto px-2 sm:px-4 lg:px-8 py-6">
+    <main class="container mx-auto px-2 sm:px-4 lg:px-8 py-6 space-y-6">
+      <!-- Code snippet showcase -->
+      <div class="rounded-lg border border-border/60 bg-muted/30 overflow-hidden">
+        <div class="flex items-center justify-between border-b border-border/40 px-1">
+          <div class="flex">
+            <button
+              v-for="(snippet, i) in codeSnippets"
+              :key="snippet.label"
+              type="button"
+              @click="activeSnippet = i"
+              :class="[
+                'px-4 py-2 text-xs font-medium transition-colors relative',
+                activeSnippet === i
+                  ? 'text-foreground'
+                  : 'text-muted-foreground hover:text-foreground/70'
+              ]"
+            >
+              {{ snippet.label }}
+              <span
+                v-if="activeSnippet === i"
+                class="absolute bottom-0 left-2 right-2 h-0.5 bg-primary rounded-full"
+              />
+            </button>
+          </div>
+          <button
+            type="button"
+            @click="copySnippet"
+            class="mr-2 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            title="Copy"
+          >
+            <Check v-if="copied" :size="14" class="text-green-500" />
+            <Clipboard v-else :size="14" />
+          </button>
+        </div>
+        <pre class="px-4 py-3 text-sm font-mono overflow-x-auto leading-relaxed"><code>{{ codeSnippets[activeSnippet].code }}</code></pre>
+      </div>
+
       <!-- Toolbar -->
-      <div class="flex flex-wrap items-center gap-2 mb-4">
+      <div class="flex flex-wrap items-center gap-2">
         <div class="flex items-center gap-2 flex-wrap">
           <Button variant="outline" size="sm" @click="handleReset">
             <RefreshCw :size="14" class="mr-1.5" /> Reset
