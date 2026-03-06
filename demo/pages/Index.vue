@@ -1,43 +1,29 @@
 <script setup lang="ts">
 import {
-  CheckCircle,
-  CirclePlus,
-  Code,
   Clipboard,
   Check,
-  Eye,
-  EyeOff,
   GitBranch,
   Globe,
   Package,
-  RefreshCw,
   User,
 } from "lucide-vue-next";
-import { ref } from "vue";
+import { ref, computed, provide } from "vue";
 import { exampleSchema } from "../utils/schemaExample.ts";
 import JsonValidator from "../../src/components/features/JsonValidator.vue";
 import SchemaInferencer from "../../src/components/features/SchemaInferencer.vue";
 import JsonSchemaEditor from "../../src/components/SchemaEditor/JsonSchemaEditor.vue";
-import Button from "../../src/components/ui/Button.vue";
 import Select from "../../src/components/ui/Select.vue";
 import { en } from "../../src/i18n/locales/en.ts";
 import { provideTranslation } from "../../src/i18n/translation-context.ts";
 import type { Translation } from "../../src/i18n/translation-keys.ts";
 import type { JSONSchema } from "../../src/types/jsonSchema.ts";
 
+// ── State ──
 const schema = ref<JSONSchema>(exampleSchema);
-const readOnly = ref(false);
-const inferDialogOpen = ref(false);
-const validateDialogOpen = ref(false);
+const inferSchema = ref<JSONSchema>({ type: "object", properties: {}, required: [] });
 const language = ref("en");
 const translation = ref<Translation>(en);
-
 provideTranslation(translation.value);
-
-const handleReset = () => (schema.value = exampleSchema);
-const handleReadOnlyToggle = () => (readOnly.value = !readOnly.value);
-const handleClear = () =>
-  (schema.value = { type: "object", properties: {}, required: [] });
 
 const languageOptions = [
   { label: "English", value: "en" },
@@ -57,39 +43,107 @@ const handleLanguageChange = (value: string) => {
   });
 };
 
+// ── Demos ──
+const demos = [
+  {
+    id: "editor",
+    label: "Schema Editor",
+    desc: "Full editor with visual builder and live JSON preview, side by side.",
+    code: `<script setup>
+import { ref } from 'vue'
+import { JsonSchemaEditor } from 'jsonjoy-builder-vue'
+
+const schema = ref({ type: 'object', properties: {} })
+<\/script>
+
+<template>
+  <JsonSchemaEditor v-model:schema="schema" />
+</template>`,
+  },
+  {
+    id: "readonly",
+    label: "Read-Only",
+    desc: "Display an existing schema without allowing modifications.",
+    code: `<JsonSchemaEditor
+  :schema="schema"
+  :read-only="true"
+/>`,
+  },
+  {
+    id: "infer",
+    label: "Infer from JSON",
+    desc: "Paste any JSON and automatically generate the matching schema.",
+    code: `<script setup>
+import { ref } from 'vue'
+import { SchemaInferencer } from 'jsonjoy-builder-vue'
+
+const show = ref(false)
+const schema = ref({})
+<\/script>
+
+<template>
+  <button @click="show = true">Infer</button>
+  <SchemaInferencer
+    v-model:visible="show"
+    @schema-inferred="schema = $event"
+  />
+</template>`,
+  },
+  {
+    id: "validate",
+    label: "Validate JSON",
+    desc: "Validate a JSON document against the current schema.",
+    code: `<script setup>
+import { ref } from 'vue'
+import { JsonValidator } from 'jsonjoy-builder-vue'
+
+const show = ref(false)
+<\/script>
+
+<template>
+  <button @click="show = true">Validate</button>
+  <JsonValidator
+    v-model:visible="show"
+    :schema="schema"
+  />
+</template>`,
+  },
+  {
+    id: "i18n",
+    label: "i18n",
+    desc: "Switch languages at runtime. 8 locales included.",
+    code: `<script setup>
+import { provideTranslation } from 'jsonjoy-builder-vue'
+import { de } from 'jsonjoy-builder-vue/i18n/locales/de'
+
+provideTranslation(de)
+<\/script>
+
+<template>
+  <JsonSchemaEditor v-model:schema="schema" />
+</template>`,
+  },
+];
+
+const activeDemo = ref("editor");
+const activeSnippet = computed(() => demos.find(d => d.id === activeDemo.value)!);
+
+const copied = ref(false);
+const copySnippet = () => {
+  navigator.clipboard.writeText(activeSnippet.value.code);
+  copied.value = true;
+  setTimeout(() => { copied.value = false; }, 1500);
+};
+
+// Infer dialog state
+const inferDialogOpen = ref(false);
+const validateDialogOpen = ref(false);
+
 const authorLinks = [
   { href: "https://github.com/gcasotti", text: "@gcasotti", icon: User },
   { href: "https://github.com/gcasotti/jsonjoy-builder-vue", text: "GitHub", icon: GitBranch, target: "_blank", rel: "nofollow noopener noreferrer" },
   { href: "https://www.npmjs.com/package/jsonjoy-builder-vue", text: "NPM", icon: Package, target: "_blank", rel: "nofollow noopener noreferrer" },
 ];
-
-// Code snippets to show alongside the demo
-const codeSnippets = [
-  {
-    label: "Basic",
-    code: `<JsonSchemaEditor v-model:schema="schema" />`,
-  },
-  {
-    label: "Read-only",
-    code: `<JsonSchemaEditor v-model:schema="schema" :read-only="true" />`,
-  },
-  {
-    label: "i18n",
-    code: `import { provideTranslation } from 'jsonjoy-builder-vue'
-import { de } from 'jsonjoy-builder-vue/i18n'
-
-provideTranslation(de)`,
-  },
-];
-
-const activeSnippet = ref(0);
-const copied = ref(false);
-
-const copySnippet = () => {
-  navigator.clipboard.writeText(codeSnippets[activeSnippet.value].code);
-  copied.value = true;
-  setTimeout(() => { copied.value = false; }, 1500);
-};
 </script>
 
 <template>
@@ -97,16 +151,13 @@ const copySnippet = () => {
     <!-- Top bar -->
     <header class="sticky top-0 z-20 bg-background/80 backdrop-blur-md border-b border-border/40">
       <div class="container mx-auto px-4 lg:px-8 h-14 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <span class="text-lg font-semibold tracking-tight">jsonjoy-builder-vue</span>
-        </div>
+        <span class="text-lg font-semibold tracking-tight">jsonjoy-builder-vue</span>
         <div class="flex items-center gap-1">
           <template v-for="(link, index) in authorLinks" :key="link.href">
             <a
               :href="link.href"
               class="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 px-1.5 py-1"
-              :target="link.target"
-              :rel="link.rel"
+              :target="link.target" :rel="link.rel"
             >
               <component :is="link.icon" :size="13" />
               <span class="hidden md:inline">{{ link.text }}</span>
@@ -117,95 +168,146 @@ const copySnippet = () => {
       </div>
     </header>
 
-    <main class="container mx-auto px-2 sm:px-4 lg:px-8 py-6 space-y-6">
-      <!-- Code snippet showcase -->
-      <div class="rounded-lg border border-border/60 bg-muted/30 overflow-hidden">
-        <div class="flex items-center justify-between border-b border-border/40 px-1">
-          <div class="flex">
-            <button
-              v-for="(snippet, i) in codeSnippets"
-              :key="snippet.label"
-              type="button"
-              @click="activeSnippet = i"
-              :class="[
-                'px-4 py-2 text-xs font-medium transition-colors relative',
-                activeSnippet === i
-                  ? 'text-foreground'
-                  : 'text-muted-foreground hover:text-foreground/70'
-              ]"
-            >
-              {{ snippet.label }}
-              <span
-                v-if="activeSnippet === i"
-                class="absolute bottom-0 left-2 right-2 h-0.5 bg-primary rounded-full"
-              />
-            </button>
-          </div>
-          <button
-            type="button"
-            @click="copySnippet"
-            class="mr-2 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-            title="Copy"
-          >
-            <Check v-if="copied" :size="14" class="text-green-500" />
-            <Clipboard v-else :size="14" />
-          </button>
-        </div>
-        <pre class="px-4 py-3 text-sm font-mono overflow-x-auto leading-relaxed"><code>{{ codeSnippets[activeSnippet].code }}</code></pre>
-      </div>
+    <main class="container mx-auto px-2 sm:px-4 lg:px-8 py-6">
+      <!-- Demo tabs -->
+      <div class="flex items-end gap-0 border-b border-border/50 mb-0 overflow-x-auto">
+        <button
+          v-for="demo in demos"
+          :key="demo.id"
+          type="button"
+          @click="activeDemo = demo.id"
+          :class="[
+            'px-4 py-2.5 text-sm font-medium transition-colors relative whitespace-nowrap',
+            activeDemo === demo.id
+              ? 'text-foreground'
+              : 'text-muted-foreground hover:text-foreground/70'
+          ]"
+        >
+          {{ demo.label }}
+          <span
+            v-if="activeDemo === demo.id"
+            class="absolute bottom-0 left-2 right-2 h-0.5 bg-primary rounded-full"
+          />
+        </button>
 
-      <!-- Toolbar -->
-      <div class="flex flex-wrap items-center gap-2">
-        <div class="flex items-center gap-2 flex-wrap">
-          <Button variant="outline" size="sm" @click="handleReset">
-            <RefreshCw :size="14" class="mr-1.5" /> Reset
-          </Button>
-          <Button variant="outline" size="sm" @click="handleClear">
-            <CirclePlus :size="14" class="mr-1.5" /> Empty
-          </Button>
-          <Button variant="outline" size="sm" @click="inferDialogOpen = true">
-            <Code :size="14" class="mr-1.5" /> Infer
-          </Button>
-          <Button variant="outline" size="sm" @click="validateDialogOpen = true">
-            <CheckCircle :size="14" class="mr-1.5" /> Validate
-          </Button>
-          <Button variant="outline" size="sm" @click="handleReadOnlyToggle">
-            <EyeOff v-if="!readOnly" :size="14" class="mr-1.5" />
-            <Eye v-else :size="14" class="mr-1.5" />
-            {{ readOnly ? 'Edit' : 'Read-only' }}
-          </Button>
-        </div>
-        <div class="ml-auto flex items-center gap-2">
+        <!-- Language selector on the right -->
+        <div class="ml-auto flex items-center gap-2 pb-1.5 pl-4 shrink-0">
           <Globe :size="14" class="text-muted-foreground" />
           <Select
             :model-value="language"
             @update:model-value="handleLanguageChange"
             :options="languageOptions"
-            placeholder="Language"
+            placeholder="Lang"
             class="h-8 text-xs font-medium w-28"
           />
         </div>
       </div>
 
-      <!-- Editor -->
-      <JsonSchemaEditor
-        :schema="schema"
-        :read-only="readOnly"
-        @update:schema="schema = $event"
-        class="shadow-sm border border-border/50 rounded-lg"
-      />
+      <!-- Active demo content -->
+      <div class="grid lg:grid-cols-[1fr,340px] gap-0 border border-t-0 border-border/50 rounded-b-lg overflow-hidden min-h-[600px]">
 
-      <!-- Dialogs -->
-      <SchemaInferencer
-        :visible="inferDialogOpen"
-        @update:visible="inferDialogOpen = $event"
-        @schema-inferred="schema = $event"
-      />
-      <JsonValidator
-        :visible="validateDialogOpen"
-        @update:visible="validateDialogOpen = $event"
-        :schema="schema"
-      />
+        <!-- Live demo panel -->
+        <div class="bg-background min-h-0 flex flex-col">
+          <!-- Description bar -->
+          <div class="px-4 py-2.5 border-b border-border/30 bg-muted/20 shrink-0">
+            <p class="text-sm text-muted-foreground">{{ activeSnippet.desc }}</p>
+          </div>
+
+          <!-- Demo: Editor (full) -->
+          <div v-if="activeDemo === 'editor'" class="grow min-h-0">
+            <JsonSchemaEditor
+              :schema="schema"
+              @update:schema="schema = $event"
+              class="h-full"
+            />
+          </div>
+
+          <!-- Demo: Read-only -->
+          <div v-else-if="activeDemo === 'readonly'" class="grow min-h-0">
+            <JsonSchemaEditor
+              :schema="schema"
+              :read-only="true"
+              class="h-full"
+            />
+          </div>
+
+          <!-- Demo: Infer -->
+          <div v-else-if="activeDemo === 'infer'" class="grow min-h-0 flex flex-col">
+            <div class="p-4 shrink-0">
+              <button
+                type="button"
+                @click="inferDialogOpen = true"
+                class="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+              >
+                Open Inferencer
+              </button>
+            </div>
+            <div class="grow min-h-0">
+              <JsonSchemaEditor
+                :schema="inferSchema"
+                @update:schema="inferSchema = $event"
+                class="h-full"
+              />
+            </div>
+            <SchemaInferencer
+              :visible="inferDialogOpen"
+              @update:visible="inferDialogOpen = $event"
+              @schema-inferred="inferSchema = $event"
+            />
+          </div>
+
+          <!-- Demo: Validate -->
+          <div v-else-if="activeDemo === 'validate'" class="grow min-h-0 flex flex-col">
+            <div class="p-4 shrink-0">
+              <button
+                type="button"
+                @click="validateDialogOpen = true"
+                class="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+              >
+                Open Validator
+              </button>
+            </div>
+            <div class="grow min-h-0">
+              <JsonSchemaEditor
+                :schema="schema"
+                :read-only="true"
+                class="h-full"
+              />
+            </div>
+            <JsonValidator
+              :visible="validateDialogOpen"
+              @update:visible="validateDialogOpen = $event"
+              :schema="schema"
+            />
+          </div>
+
+          <!-- Demo: i18n -->
+          <div v-else-if="activeDemo === 'i18n'" class="grow min-h-0">
+            <JsonSchemaEditor
+              :schema="schema"
+              @update:schema="schema = $event"
+              class="h-full"
+            />
+          </div>
+        </div>
+
+        <!-- Code panel -->
+        <div class="border-t lg:border-t-0 lg:border-l border-border/50 bg-muted/30 flex flex-col min-h-0">
+          <div class="flex items-center justify-between px-3 py-2 border-b border-border/30 shrink-0">
+            <span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">Code</span>
+            <button
+              type="button"
+              @click="copySnippet"
+              class="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              title="Copy"
+            >
+              <Check v-if="copied" :size="13" class="text-green-500" />
+              <Clipboard v-else :size="13" />
+            </button>
+          </div>
+          <pre class="px-4 py-3 text-[13px] font-mono leading-relaxed overflow-auto grow"><code>{{ activeSnippet.code }}</code></pre>
+        </div>
+      </div>
     </main>
   </div>
 </template>
