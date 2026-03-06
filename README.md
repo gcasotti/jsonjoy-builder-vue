@@ -1,6 +1,6 @@
 # JSON Schema Builder (Vue)
 
-[![image](https://github.com/user-attachments/assets/6be1cecf-e0d9-4597-ab04-7124e37e332d)](https://github.com/gcasotti/jsonschema-builder-vue)
+[![image](screenshot.png)](https://github.com/gcasotti/jsonschema-builder-vue)
 
 A modern, Vue 3 + PrimeVue visual JSON Schema editor for creating and manipulating JSON Schema definitions with an intuitive interface.
 
