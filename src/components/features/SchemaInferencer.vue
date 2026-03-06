@@ -3,7 +3,7 @@ import { Loader2 } from "lucide-vue-next";
 import { ref, watch } from "vue";
 import Button from "../../components/ui/Button.vue";
 import Dialog from "../../components/ui/Dialog.vue";
-import type MonacoEditor from "../../components/ui/MonacoEditor.vue";
+import MonacoEditor from "../../components/ui/MonacoEditor.vue";
 import { useTranslation } from "../../hooks/use-translation.ts";
 import { createSchemaFromJson } from "../../lib/schema-inference.ts";
 import type { JSONSchema } from "../../types/jsonSchema.ts";
