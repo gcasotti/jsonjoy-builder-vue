@@ -6,7 +6,8 @@ on:
       - "v*"
 
 permissions:
-  contents: write
+  id-token: write   # OIDC for npm provenance
+  contents: write   # create GitHub release
 
 jobs:
   release:
@@ -14,23 +15,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # needed for changelog generation
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           registry-url: https://registry.npmjs.org
 
       - run: npm ci
       - run: npm run test:all
       - run: npm run build
 
-      # ── Publish to npm ──
-      - run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # ── Publish to npm (OIDC, no token needed) ──
+      - run: npm publish --provenance --access public
 
-      # ── Generate changelog from commits since last tag ──
+      # ── Changelog from commits since previous tag ──
       - name: Generate changelog
         id: changelog
         run: |
@@ -40,14 +39,12 @@ jobs:
           else
             LOG=$(git log --pretty=format:"- %s" ${PREV_TAG}..HEAD)
           fi
-          # write to file to avoid multiline issues
           echo "$LOG" > /tmp/changelog.txt
 
-      # ── Create GitHub Release ──
+      # ── GitHub Release ──
       - name: GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           body_path: /tmp/changelog.txt
-          generate_release_notes: false
           draft: false
           prerelease: ${{ contains(github.ref, '-beta') || contains(github.ref, '-alpha') || contains(github.ref, '-rc') }}
