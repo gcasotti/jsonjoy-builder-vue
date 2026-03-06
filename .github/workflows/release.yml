@@ -8,10 +8,14 @@ on:
 permissions:
   id-token: write   # OIDC for npm provenance
   contents: write   # create GitHub release
+  pages: write      # deploy to GitHub Pages
 
 jobs:
   release:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -29,9 +33,19 @@ jobs:
       # ── Publish to npm (OIDC, no token needed) ──
       - run: npm publish --provenance --access public
 
+      # ── Build demo page ──
+      - run: npx rsbuild build
+
+      # ── Deploy demo to GitHub Pages ──
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist-demo
+      - uses: actions/deploy-pages@v4
+        id: deploy
+
       # ── Changelog from commits since previous tag ──
       - name: Generate changelog
-        id: changelog
         run: |
           PREV_TAG=$(git tag --sort=-v:refname | head -n 2 | tail -n 1)
           if [ -z "$PREV_TAG" ]; then
