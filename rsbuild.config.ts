@@ -23,7 +23,7 @@ export default defineConfig({
     define: {
       ...publicVars,
       "import.meta.env.SSR": "false",
-      "import.meta.env.BASE_URL": JSON.stringify(
+      __BASE_PATH__: JSON.stringify(
         process.env.PUBLIC_BASE_PATH || "/",
       ),
     },
