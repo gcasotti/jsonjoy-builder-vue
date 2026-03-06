@@ -21,6 +21,7 @@
     "type": "git",
     "url": "git+https://github.com/gcasotti/jsonschema-builder-vue.git"
   },
+  "homepage": "https://gcasotti.github.io/jsonschema-builder-vue",
   "files": [
     "dist",
     "!tsconfig.tsbuildinfo",
