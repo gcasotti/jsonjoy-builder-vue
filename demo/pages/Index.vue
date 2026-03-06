@@ -29,7 +29,8 @@ provideTranslation(translation);
 
 // ── State ──
 const schema = ref<JSONSchema>(exampleSchema);
-const inferSchema = ref<JSONSchema>({ type: "object", properties: {} });
+const inferPopupSchema = ref<JSONSchema>({ type: "object", properties: {} });
+const inferInlineSchema = ref<JSONSchema>({ type: "object", properties: {} });
 const inferDialogOpen = ref(false);
 const validatorDialogOpen = ref(false);
 const schemaText = computed(() => JSON.stringify(schema.value, null, 2));
@@ -560,12 +561,12 @@ lang.value = de  // all labels update instantly`,
                 class="px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-medium hover:shadow-md hover:shadow-amber-500/20 transition-all mb-3">
                 Open Inferencer
               </button>
-              <div v-if="Object.keys((inferSchema as any).properties || {}).length"
+              <div v-if="Object.keys((inferPopupSchema as any).properties || {}).length"
                 class="rounded-xl border border-border/60 overflow-hidden shadow-xs bg-white" style="height:380px">
-                <JsonSchemaEditor :schema="inferSchema" :read-only="true" class="h-full" />
+                <JsonSchemaEditor :schema="inferPopupSchema" :read-only="true" class="h-full" />
               </div>
               <p v-else class="text-sm text-gray-400 italic">Inferred schema will appear here.</p>
-              <SchemaInferencer :visible="inferDialogOpen" @update:visible="inferDialogOpen = $event" @schema-inferred="inferSchema = $event" />
+              <SchemaInferencer :visible="inferDialogOpen" @update:visible="inferDialogOpen = $event" @schema-inferred="inferPopupSchema = $event" />
               <div class="mt-3 rounded-xl border border-border/40 bg-gray-50/60 overflow-hidden">
                 <div class="flex items-center justify-between px-4 py-2 border-b border-border/30">
                   <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Code</span>
@@ -585,12 +586,12 @@ lang.value = de  // all labels update instantly`,
               <div class="grid lg:grid-cols-2 gap-4">
                 <div>
                   <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">1 — Paste JSON</p>
-                  <SchemaInferencer @schema-inferred="inferSchema = $event" />
+                  <SchemaInferencer @schema-inferred="inferInlineSchema = $event" />
                 </div>
                 <div>
                   <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">2 — Resulting schema</p>
                   <div class="rounded-xl border border-border/60 overflow-hidden shadow-xs bg-white" style="height:368px">
-                    <JsonSchemaEditor :schema="inferSchema" @update:schema="inferSchema = $event" :show-json-editor="false" :show-fullscreen="false" class="h-full" />
+                    <JsonSchemaEditor :schema="inferInlineSchema" @update:schema="inferInlineSchema = $event" :show-json-editor="false" :show-fullscreen="false" class="h-full" />
                   </div>
                 </div>
               </div>
