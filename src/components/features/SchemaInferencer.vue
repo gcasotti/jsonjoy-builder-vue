@@ -79,8 +79,8 @@ const handleInfer = () => {
   >
     <template #header>
       <div class="mb-2">
-        <div class="text-lg font-semibold">{{ t.schemaInferencerTitle }}</div>
-        <p class="text-sm text-muted-foreground">{{ t.schemaInferencerDescription }}</p>
+        <div class="text-lg font-semibold">{{ t.inferrerTitle }}</div>
+        <p class="text-sm text-muted-foreground">{{ t.inferrerDescription }}</p>
       </div>
     </template>
 
@@ -93,11 +93,11 @@ const handleInfer = () => {
 
       <div class="flex justify-end gap-2">
         <Button variant="outline" size="sm" @click="emit('update:visible', false)">
-          {{ t.fieldAddNewCancel }}
+          {{ t.inferrerCancel }}
         </Button>
         <Button size="sm" @click="handleInfer" :disabled="isProcessing">
           <Loader2 v-if="isProcessing" class="animate-spin mr-2" :size="14" />
-          {{ t.schemaInferencerInferButton }}
+          {{ t.inferrerGenerate }}
         </Button>
       </div>
     </div>
@@ -114,7 +114,7 @@ const handleInfer = () => {
     <div class="flex justify-end">
       <Button size="sm" @click="handleInfer" :disabled="isProcessing">
         <Loader2 v-if="isProcessing" class="animate-spin mr-2" :size="14" />
-        {{ t.schemaInferencerInferButton }}
+        {{ t.inferrerGenerate }}
       </Button>
     </div>
   </div>

@@ -83,8 +83,8 @@ const errorCount = computed(() => validationResult.value?.errors?.length || 0);
   >
     <template v-if="isDialog" #header>
       <div class="mb-2">
-        <div class="text-lg font-semibold">{{ t.jsonValidatorTitle }}</div>
-        <p class="text-sm text-muted-foreground">{{ t.jsonValidatorDescription }}</p>
+        <div class="text-lg font-semibold">{{ t.validatorTitle }}</div>
+        <p class="text-sm text-muted-foreground">{{ t.validatorDescription }}</p>
       </div>
     </template>
 
@@ -102,20 +102,20 @@ const errorCount = computed(() => validationResult.value?.errors?.length || 0);
         <div class="flex items-center gap-2">
           <template v-if="isValidating">
             <Loader2 class="animate-spin" :size="16" />
-            <span class="text-sm text-muted-foreground">{{ t.jsonValidating }}</span>
+            <span class="text-sm text-muted-foreground">{{ t.schemaEditorLoading }}</span>
           </template>
           <template v-else-if="validationResult?.valid">
             <CheckCircle :size="16" class="text-green-500" />
-            <span class="text-sm text-green-600">{{ t.jsonValidatorValid }}</span>
+            <span class="text-sm text-green-600">{{ t.validatorValid }}</span>
           </template>
           <template v-else-if="validationResult && !validationResult.valid">
             <XCircle :size="16" class="text-red-500" />
             <span class="text-sm text-red-600">
-              {{ errorCount }} {{ errorCount === 1 ? t.jsonValidatorError : t.jsonValidatorErrors }}
+              {{ t.validatorErrorCount.replace('{count}', String(errorCount)) }}
             </span>
           </template>
         </div>
-        <Button size="sm" @click="handleValidation">{{ t.jsonValidatorValidateButton }}</Button>
+        <Button size="sm" @click="handleValidation">{{ t.validatorTitle }}</Button>
       </div>
 
       <div v-if="validationResult?.errors?.length" class="space-y-2 max-h-[200px] overflow-y-auto">
@@ -127,7 +127,7 @@ const errorCount = computed(() => validationResult.value?.errors?.length || 0);
           <XCircle :size="14" class="text-red-500 mt-0.5 shrink-0" />
           <div>
             <span class="font-mono text-xs text-muted-foreground">{{ error.path }}</span>
-            <span v-if="error.line"> ({{ t.jsonValidatorLine }} {{ error.line }})</span>
+            <span v-if="error.line"> ({{ t.validatorErrorLocationLineOnly.replace('{line}', String(error.line)) }})</span>
             <p class="text-red-600">{{ error.message }}</p>
           </div>
         </div>
