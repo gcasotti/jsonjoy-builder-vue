@@ -1,5 +1,5 @@
 {
-  "name": "jsonjoy-builder-vue",
+  "name": "jsonschema-builder-vue",
   "license": "MIT",
   "description": "Visual JSON Schema editor for creating and manipulating JSON Schema definitions with an intuitive interface.",
   "author": {
@@ -19,7 +19,7 @@
   "sideEffects": false,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gcasotti/jsonjoy-builder-vue.git"
+    "url": "git+https://github.com/gcasotti/jsonschema-builder-vue.git"
   },
   "files": [
     "dist",
@@ -28,10 +28,10 @@
   ],
   "main": "./dist/index.js",
   "module": "./dist/index.js",
-  "types": "./dist/jsonjoy-builder-vue.d.ts",
+  "types": "./dist/jsonschema-builder-vue.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/jsonjoy-builder-vue.d.ts",
+      "types": "./dist/jsonschema-builder-vue.d.ts",
       "import": "./dist/index.js",
       "module": "./dist/index.js",
       "default": "./dist/index.js"

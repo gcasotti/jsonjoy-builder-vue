@@ -160,16 +160,16 @@ const code: Record<string, string> = {
 />`,
   "infer-inline": `<SchemaInferencer @schema-inferred="schema = $event" />
 <JsonSchemaEditor v-model:schema="schema" />`,
-  "infer-util": `import { createSchemaFromJson } from 'jsonjoy-builder-vue'
+  "infer-util": `import { createSchemaFromJson } from 'jsonschema-builder-vue'
 const schema = createSchemaFromJson({ name: "Alice", age: 25 })`,
   "validator-popup": `<JsonValidator v-model:visible="show" :schema="schema" />`,
   "validator-inline": `<JsonValidator :schema="schema" />`,
-  "validator-util": `import { validateJson } from 'jsonjoy-builder-vue'
+  "validator-util": `import { validateJson } from 'jsonschema-builder-vue'
 const result = validateJson('{ "name": 42 }', schema)`,
   i18n: `import { ref } from 'vue'
-import { provideTranslation } from 'jsonjoy-builder-vue'
-import { en } from 'jsonjoy-builder-vue/i18n/locales/en'
-import { de } from 'jsonjoy-builder-vue/i18n/locales/de'
+import { provideTranslation } from 'jsonschema-builder-vue'
+import { en } from 'jsonschema-builder-vue/i18n/locales/en'
+import { de } from 'jsonschema-builder-vue/i18n/locales/de'
 
 const lang = ref(en)
 provideTranslation(lang)
@@ -190,21 +190,21 @@ lang.value = de  // all labels update instantly`,
             <Code2 :size="20" class="text-white" />
           </div>
           <div>
-            <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">jsonjoy-builder-vue</h1>
+            <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">jsonschema-builder-vue</h1>
             <p class="text-sm text-gray-500 mt-0.5">Interactive JSON Schema editor components for Vue&nbsp;3</p>
           </div>
         </div>
         <div class="flex items-center gap-3 flex-wrap">
-          <a href="https://github.com/gcasotti/jsonjoy-builder-vue" target="_blank" rel="nofollow noopener noreferrer"
+          <a href="https://github.com/gcasotti/jsonschema-builder-vue" target="_blank" rel="nofollow noopener noreferrer"
              class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg bg-gray-900 text-white hover:bg-gray-800 transition-colors shadow-sm">
             <GitBranch :size="14" /> GitHub
           </a>
-          <a href="https://www.npmjs.com/package/jsonjoy-builder-vue" target="_blank" rel="nofollow noopener noreferrer"
+          <a href="https://www.npmjs.com/package/jsonschema-builder-vue" target="_blank" rel="nofollow noopener noreferrer"
              class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg border border-border bg-white hover:bg-gray-50 transition-colors shadow-sm">
             <Package :size="14" /> npm
           </a>
           <span class="inline-flex items-center px-2.5 py-1 text-xs font-mono rounded-full bg-blue-50 text-blue-700 border border-blue-100">
-            npm i jsonjoy-builder-vue
+            npm i jsonschema-builder-vue
           </span>
         </div>
       </div>
@@ -732,7 +732,7 @@ lang.value = de  // all labels update instantly`,
           <!-- Footer -->
           <footer class="text-center text-xs text-gray-400 pt-8 pb-12 border-t border-border/20">
             Built with Vue&nbsp;3 · MIT License ·
-            <a href="https://github.com/gcasotti/jsonjoy-builder-vue" target="_blank" rel="nofollow noopener noreferrer" class="underline hover:text-gray-600">Source on GitHub</a>
+            <a href="https://github.com/gcasotti/jsonschema-builder-vue" target="_blank" rel="nofollow noopener noreferrer" class="underline hover:text-gray-600">Source on GitHub</a>
           </footer>
 
         </div>
