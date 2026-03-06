@@ -151,7 +151,7 @@ const runValidate = () => {
     const result = m.validateJson(validUtilInput.value, schema.value);
     validUtilOutput.value = result.valid
       ? "✓ Valid"
-      : result.errors!.map((e) => `✗ ${e.path}: ${e.message}`).join("\n");
+      : result.errors?.map((e) => `✗ ${e.path}: ${e.message}`).join("\n");
   });
 };
 
