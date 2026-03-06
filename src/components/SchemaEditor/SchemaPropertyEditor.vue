@@ -110,7 +110,7 @@ const handleDelete = () => {
   <div
     :class="
       cn(
-        'mb-2 animate-in rounded-lg border transition-all duration-200',
+        'mb-2 rounded-lg border transition-colors duration-200',
         depth > 0 && 'ml-0 sm:ml-4 border-l border-l-border/40',
       )
     "
@@ -223,7 +223,7 @@ const handleDelete = () => {
     </div>
 
     <!-- Type-specific editor -->
-    <div v-if="expanded" class="pt-1 pb-2 px-2 sm:px-3 animate-in">
+    <div v-if="expanded" class="pt-1 pb-2 px-2 sm:px-3">
       <p v-if="readOnly && displayDesc" class="pb-2">{{ displayDesc }}</p>
       <TypeEditor
         :schema="schema"

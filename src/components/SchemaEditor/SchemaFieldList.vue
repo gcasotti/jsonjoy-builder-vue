@@ -29,7 +29,7 @@ const validationTree = computed(() => buildValidationTree(parentSchema.value, t)
 </script>
 
 <template>
-  <div class="space-y-2 animate-in">
+  <div class="space-y-2">
     <SchemaPropertyEditor
       v-for="property in properties"
       :key="property.name"
