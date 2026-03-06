@@ -1,19 +1,21 @@
 <script setup lang="ts">
 import { ChevronDown, ChevronRight, X } from "lucide-vue-next";
-import { ref, watch } from "vue";
+import { ref, computed } from "vue";
 import InputField from "../../components/ui/InputField.vue";
 import Badge from "../../components/ui/Badge.vue";
 import ButtonToggle from "../../components/ui/ButtonToggle.vue";
 import { useTranslation } from "../../hooks/use-translation.ts";
+import { useSchemaStore } from "../../hooks/useSchemaStore.ts";
 import { cn } from "../../lib/utils.ts";
 import type { JSONSchema, ObjectJSONSchema, SchemaType } from "../../types/jsonSchema.ts";
-import { asObjectSchema, getSchemaDescription, withObjectSchema } from "../../types/jsonSchema.ts";
+import { getSchemaDescription, withObjectSchema } from "../../types/jsonSchema.ts";
 import type { ValidationTreeNode } from "../../types/validation.ts";
 import TypeDropdown from "./TypeDropdown.vue";
 import TypeEditor from "./TypeEditor.vue";
 
 const props = withDefaults(
   defineProps<{
+    path: string[];
     name: string;
     schema: JSONSchema;
     required?: boolean;
@@ -24,19 +26,19 @@ const props = withDefaults(
   { required: false, readOnly: false, depth: 0 },
 );
 
-const emit = defineEmits<{
-  delete: [];
-  nameChange: [newName: string];
-  requiredChange: [required: boolean];
-  schemaChange: [schema: ObjectJSONSchema];
-}>();
-
+const store = useSchemaStore();
 const t = useTranslation();
 const expanded = ref(false);
 const isEditingName = ref(false);
 const isEditingDesc = ref(false);
-const tempName = ref(props.name);
-const tempDesc = ref(getSchemaDescription(props.schema));
+
+// Display values — computed directly from props, no side effects.
+const displayName = computed(() => props.name);
+const displayDesc = computed(() => getSchemaDescription(props.schema));
+
+// Edit-local refs — only populated when user starts editing.
+const tempName = ref("");
+const tempDesc = ref("");
 
 const type = () =>
   withObjectSchema(
@@ -45,18 +47,20 @@ const type = () =>
     "object" as SchemaType,
   );
 
-watch(
-  () => [props.name, props.schema],
-  () => {
-    tempName.value = props.name;
-    tempDesc.value = getSchemaDescription(props.schema);
-  },
-);
+const startEditingName = () => {
+  tempName.value = props.name;
+  isEditingName.value = true;
+};
+
+const startEditingDesc = () => {
+  tempDesc.value = getSchemaDescription(props.schema);
+  isEditingDesc.value = true;
+};
 
 const handleNameSubmit = () => {
   const trimmedName = tempName.value.trim();
   if (trimmedName && trimmedName !== props.name) {
-    emit("nameChange", trimmedName);
+    store.renameProperty(props.path, props.name, trimmedName);
   } else {
     tempName.value = props.name;
   }
@@ -66,10 +70,11 @@ const handleNameSubmit = () => {
 const handleDescSubmit = () => {
   const trimmedDesc = tempDesc.value.trim();
   if (trimmedDesc !== getSchemaDescription(props.schema)) {
-    emit("schemaChange", {
-      ...asObjectSchema(props.schema),
-      description: trimmedDesc || undefined,
-    });
+    // Update the property schema with the new description
+    const currentSchema = store.getAtPath([...props.path, props.name]);
+    const plain = JSON.parse(JSON.stringify(currentSchema ?? { type: "object" }));
+    plain.description = trimmedDesc || undefined;
+    store.updateProperty(props.path, props.name, plain);
   } else {
     tempDesc.value = getSchemaDescription(props.schema);
   }
@@ -77,18 +82,27 @@ const handleDescSubmit = () => {
 };
 
 const handleSchemaUpdate = (updatedSchema: ObjectJSONSchema) => {
+  // Preserve the description from the current property
   const description = getSchemaDescription(props.schema);
-  emit("schemaChange", {
-    ...updatedSchema,
-    description: description || undefined,
-  });
+  const plain = JSON.parse(JSON.stringify(updatedSchema));
+  plain.description = description || undefined;
+  store.updateProperty(props.path, props.name, plain);
 };
 
 const handleTypeChange = (newType: SchemaType) => {
-  emit("schemaChange", {
-    ...asObjectSchema(props.schema),
-    type: newType,
-  });
+  const currentSchema = store.getAtPath([...props.path, props.name]);
+  const plain = JSON.parse(JSON.stringify(currentSchema ?? { type: "object" }));
+  plain.type = newType;
+  store.updateProperty(props.path, props.name, plain);
+};
+
+const handleRequiredToggle = () => {
+  if (props.readOnly) return;
+  store.setPropertyRequired(props.path, props.name, !props.required);
+};
+
+const handleDelete = () => {
+  store.deleteProperty(props.path, props.name);
 };
 </script>
 
@@ -129,11 +143,11 @@ const handleTypeChange = (newType: SchemaType) => {
             <button
               v-else
               type="button"
-              @click="isEditingName = true"
-              @keydown="$event.key === 'Enter' && (isEditingName = true)"
+              @click="startEditingName()"
+              @keydown="$event.key === 'Enter' && startEditingName()"
               class="json-field-label font-medium cursor-text px-2 py-0.5 -mx-0.5 rounded-sm hover:bg-secondary/30 hover:shadow-xs hover:ring-1 hover:ring-ring/20 transition-all text-left truncate min-w-[80px] max-w-[50%]"
             >
-              {{ name }}
+              {{ displayName }}
             </button>
 
             <!-- Description -->
@@ -148,19 +162,19 @@ const handleTypeChange = (newType: SchemaType) => {
               @focus="($event.target as HTMLInputElement)?.select()"
             />
             <button
-              v-else-if="tempDesc"
+              v-else-if="displayDesc"
               type="button"
-              @click="isEditingDesc = true"
-              @keydown="$event.key === 'Enter' && (isEditingDesc = true)"
+              @click="startEditingDesc()"
+              @keydown="$event.key === 'Enter' && startEditingDesc()"
               class="text-xs text-muted-foreground italic cursor-text px-2 py-0.5 -mx-0.5 rounded-sm hover:bg-secondary/30 hover:shadow-xs hover:ring-1 hover:ring-ring/20 transition-all text-left truncate flex-1 max-w-[40%] mr-2"
             >
-              {{ tempDesc }}
+              {{ displayDesc }}
             </button>
             <button
               v-else
               type="button"
-              @click="isEditingDesc = true"
-              @keydown="$event.key === 'Enter' && (isEditingDesc = true)"
+              @click="startEditingDesc()"
+              @keydown="$event.key === 'Enter' && startEditingDesc()"
               class="text-xs text-muted-foreground/50 italic cursor-text px-2 py-0.5 -mx-0.5 rounded-sm hover:bg-secondary/30 hover:shadow-xs hover:ring-1 hover:ring-ring/20 transition-all opacity-0 group-hover:opacity-100 text-left truncate flex-1 max-w-[40%] mr-2"
             >
               {{ t.propertyDescriptionButton }}
@@ -177,7 +191,7 @@ const handleTypeChange = (newType: SchemaType) => {
 
             <!-- Required toggle -->
             <ButtonToggle
-              @click="!readOnly && emit('requiredChange', !required)"
+              @click="handleRequiredToggle"
               :class="required ? 'bg-red-50 text-red-500' : 'bg-secondary text-muted-foreground'"
             >
               {{ required ? t.propertyRequired : t.propertyOptional }}
@@ -199,7 +213,7 @@ const handleTypeChange = (newType: SchemaType) => {
       <div v-if="!readOnly" class="flex items-center gap-1 text-muted-foreground">
         <button
           type="button"
-          @click="emit('delete')"
+          @click="handleDelete"
           class="p-1 rounded-md hover:bg-secondary hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
           :aria-label="t.propertyDelete"
         >
@@ -210,9 +224,10 @@ const handleTypeChange = (newType: SchemaType) => {
 
     <!-- Type-specific editor -->
     <div v-if="expanded" class="pt-1 pb-2 px-2 sm:px-3 animate-in">
-      <p v-if="readOnly && tempDesc" class="pb-2">{{ tempDesc }}</p>
+      <p v-if="readOnly && displayDesc" class="pb-2">{{ displayDesc }}</p>
       <TypeEditor
         :schema="schema"
+        :path="[...path, name]"
         :read-only="readOnly"
         :validation-node="validationNode"
         :depth="depth + 1"
