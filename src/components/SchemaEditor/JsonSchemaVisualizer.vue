@@ -1,80 +1,49 @@
 <script setup lang="ts">
-import { Download, FileJson, Loader2 } from "lucide-vue-next";
-import { ref } from "vue";
-import { useMonacoTheme } from "../../hooks/use-monaco-theme.ts";
+import { Download, FileJson } from "lucide-vue-next";
+import { computed, ref, watch } from "vue";
 import { useTranslation } from "../../hooks/use-translation.ts";
+import { useSchemaStore } from "../../hooks/useSchemaStore.ts";
 import { cn } from "../../lib/utils.ts";
-import type { JSONSchema } from "../../types/jsonSchema.ts";
-import * as monaco from "monaco-editor";
+import MonacoEditor from "../ui/MonacoEditor.vue";
 
 const props = defineProps<{
-  schema: JSONSchema;
   class?: string;
 }>();
 
-const emit = defineEmits<{
-  change: [schema: JSONSchema];
-}>();
-
-const editorContainer = ref<HTMLDivElement | null>(null);
-const editorInstance = ref<monaco.editor.IStandaloneCodeEditor | null>(null);
-const {
-  currentTheme,
-  defineMonacoThemes,
-  configureJsonDefaults,
-  defaultEditorOptions,
-} = useMonacoTheme();
-
+const store = useSchemaStore();
+const schema = computed(() => store.schema.value);
 const t = useTranslation();
-const isLoading = ref(true);
 
-import { onMounted, onUnmounted, watch } from "vue";
+// ── One-way text buffer ──
+// `editorText` is a local string ref that owns Monaco's content.
+// Store-to-editor: computed → rAF inside MonacoEditor (via prop)
+// Editor-to-store: debounced emit → this handler
+let lastStoreJson = JSON.stringify(schema.value);
+const editorText = ref(JSON.stringify(schema.value, null, 2));
 
-onMounted(() => {
-  if (!editorContainer.value) return;
-
-  defineMonacoThemes(monaco);
-  configureJsonDefaults(monaco);
-
-  editorInstance.value = monaco.editor.create(editorContainer.value, {
-    value: JSON.stringify(props.schema, null, 2),
-    language: "json",
-    theme: currentTheme(),
-    ...defaultEditorOptions,
-  });
-
-  isLoading.value = false;
-
-  editorInstance.value.onDidChangeModelContent(() => {
-    const value = editorInstance.value?.getValue();
-    if (!value) return;
-    try {
-      const parsedJson = JSON.parse(value);
-      emit("change", parsedJson);
-    } catch {
-      // Monaco will show the error inline
-    }
-  });
+// When the store changes (e.g. from visual editor), update the text buffer
+watch(schema, (newSchema) => {
+  const newJson = JSON.stringify(newSchema);
+  if (newJson === lastStoreJson) return; // nothing changed structurally
+  lastStoreJson = newJson;
+  editorText.value = JSON.stringify(newSchema, null, 2);
 });
 
-watch(
-  () => props.schema,
-  (newSchema) => {
-    if (!editorInstance.value) return;
-    const currentValue = editorInstance.value.getValue();
-    const newValue = JSON.stringify(newSchema, null, 2);
-    if (currentValue !== newValue) {
-      editorInstance.value.setValue(newValue);
-    }
-  },
-);
-
-onUnmounted(() => {
-  editorInstance.value?.dispose();
-});
+// When the editor emits a change, parse and push to store
+const handleEditorUpdate = (newText: string) => {
+  try {
+    const parsed = JSON.parse(newText);
+    const newJson = JSON.stringify(parsed);
+    if (newJson === lastStoreJson) return;
+    lastStoreJson = newJson;
+    store.replaceSchema(parsed);
+  } catch {
+    // Invalid JSON — Monaco will show the error inline
+  }
+};
 
 const handleDownload = () => {
-  const content = JSON.stringify(props.schema, null, 2);
+  const content = JSON.stringify(schema.value, null, 2);
   const blob = new Blob([content], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -106,13 +75,11 @@ const handleDownload = () => {
       </button>
     </div>
     <div class="grow flex min-h-0 relative">
-      <div
-        v-if="isLoading"
-        class="flex items-center justify-center h-full w-full bg-secondary/30 absolute inset-0 z-10"
-      >
-        <Loader2 class="h-6 w-6 animate-spin" />
-      </div>
-      <div ref="editorContainer" class="w-full h-full" />
+      <MonacoEditor
+        :model-value="editorText"
+        @update:model-value="handleEditorUpdate"
+        language="json"
+      />
     </div>
   </div>
 </template>
