@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import PDialog from "primevue/dialog";
+import { useOverlayContainer } from "../../hooks/use-overlay-container.ts";
+
+const { overlayContainer } = useOverlayContainer();
 
 const props = withDefaults(
   defineProps<{
@@ -23,6 +26,7 @@ const emit = defineEmits<{
     :modal="props.modal"
     :closable="true"
     :class="props.class"
+    :appendTo="overlayContainer"
     @update:visible="emit('update:visible', $event)"
   >
     <template v-if="$slots.header" #header>
