@@ -1,8 +1,8 @@
-import { auraPreset } from "../src/themes/presets.ts";
 import PrimeVue from "primevue/config";
 import Tooltip from "primevue/tooltip";
 import { createApp } from "vue";
 import { createRouter, createWebHistory } from "vue-router";
+import { auraPreset } from "../src/themes/presets.ts";
 import App from "./App.vue";
 import "./index.css";
 
@@ -28,6 +28,14 @@ app.use(PrimeVue, {
     preset: auraPreset,
     options: {
       darkModeSelector: ".jscb-dark",
+    },
+  },
+  pt: {
+    select: {
+      overlay: { class: "jscb" },
+    },
+    dialog: {
+      mask: { class: "jscb" },
     },
   },
 });
