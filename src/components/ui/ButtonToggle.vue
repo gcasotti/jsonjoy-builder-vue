@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PButton from "primevue/button";
 import { cn } from "../../lib/utils.ts";
 
 defineProps<{
@@ -11,16 +12,13 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <button
+  <PButton
     type="button"
-    :class="
-      cn(
-        'text-xs px-2 py-1 rounded-md font-medium min-w-[80px] text-center cursor-pointer hover:shadow-xs hover:ring-2 hover:ring-ring/30 active:scale-95 transition-all whitespace-nowrap',
-        $props.class,
-      )
-    "
+    :class="cn('text-xs px-2 py-1 min-w-[80px] whitespace-nowrap', $props.class)"
+    size="small"
+    text
     @click="emit('click', $event)"
   >
     <slot />
-  </button>
+  </PButton>
 </template>
