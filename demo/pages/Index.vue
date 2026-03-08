@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import {
-  Check,
   ChevronDown,
   ChevronRight,
-  Clipboard,
   Code2,
   GitBranch,
   Globe,
@@ -27,6 +25,7 @@ import type { PresetName } from "../../src/themes/presets.ts";
 import { useTheme } from "../../src/themes/useTheme.ts";
 import type { JSONSchema } from "../../src/types/jsonSchema.ts";
 import { exampleSchema } from "../utils/schemaExample.ts";
+import DemoBlock from "../components/DemoBlock.vue";
 
 // ── Reactive translation ──
 const translation = ref<Translation>(en);
@@ -113,16 +112,6 @@ const go = (id: string) => {
 };
 const toggle = (id: string) => {
   expanded.value[id] = !expanded.value[id];
-};
-
-// ── Copy ──
-const copiedId = ref("");
-const copy = (code: string, id: string) => {
-  navigator.clipboard.writeText(code);
-  copiedId.value = id;
-  setTimeout(() => {
-    copiedId.value = "";
-  }, 1500);
 };
 
 // ── i18n ──
@@ -243,43 +232,293 @@ const validatorEvents: E[] = [
   { name: "update:visible", payload: "boolean", desc: "Dialog open/close." },
 ];
 
-// ── Code snippets ──
+// ── Complete SFC Code Snippets ──
 const code: Record<string, string> = {
-  "editor-basic": `<JsonSchemaEditor v-model:schema="schema" />`,
-  "editor-visual": `<JsonSchemaEditor v-model:schema="schema" :show-json-editor="false" />`,
-  "editor-readonly": `<JsonSchemaEditor :schema="schema" :read-only="true" />`,
-  "editor-nofs": `<JsonSchemaEditor v-model:schema="schema" :show-fullscreen="false" />`,
-  "editor-sync": `<JsonSchemaEditor v-model:schema="schema" :show-json-editor="false" />
-<textarea :value="JSON.stringify(schema, null, 2)" readonly />`,
-  "infer-popup": `<SchemaInferencer
-  v-model:visible="show"
-  @schema-inferred="schema = $event"
-/>`,
-  "infer-inline": `<SchemaInferencer @schema-inferred="schema = $event" />
-<JsonSchemaEditor v-model:schema="schema" />`,
-  "infer-util": `import { createSchemaFromJson } from 'jsonschema-builder-vue'
-const schema = createSchemaFromJson({ name: "Alice", age: 25 })`,
-  "validator-popup": `<JsonValidator v-model:visible="show" :schema="schema" />`,
-  "validator-inline": `<JsonValidator :schema="schema" />`,
-  "validator-util": `import { validateJson } from 'jsonschema-builder-vue'
-const result = validateJson('{ "name": 42 }', schema)`,
-  i18n: `import { ref } from 'vue'
-import { provideTranslation } from 'jsonschema-builder-vue'
-import { en } from 'jsonschema-builder-vue/i18n/locales/en'
-import { de } from 'jsonschema-builder-vue/i18n/locales/de'
+  "editor-basic": `<script setup lang="ts">
+import { ref } from "vue"
+import { JsonSchemaEditor } from "jsonschema-builder-vue"
+import type { JSONSchema } from "jsonschema-builder-vue"
 
-const lang = ref(en)
-provideTranslation(lang)
-lang.value = de  // all labels update instantly`,
-  theming: `import { useTheme } from 'jsonschema-builder-vue'
+const schema = ref<JSONSchema>({
+  type: "object",
+  properties: {
+    name: { type: "string", description: "Full name" },
+    age: { type: "number", description: "Age in years" },
+  },
+})
+<\/script>
 
-const { switchPreset, toggleDarkMode, currentPreset, darkMode } = useTheme()
+<template>
+  <JsonSchemaEditor v-model:schema="schema" />
+</template>`,
 
-// Switch to Material Design theme
-switchPreset('material')
+  "editor-visual": `<script setup lang="ts">
+import { ref } from "vue"
+import { JsonSchemaEditor } from "jsonschema-builder-vue"
+import type { JSONSchema } from "jsonschema-builder-vue"
 
-// Toggle dark mode
-toggleDarkMode()`,
+const schema = ref<JSONSchema>({ type: "object", properties: {} })
+<\/script>
+
+<template>
+  <JsonSchemaEditor v-model:schema="schema" :show-json-editor="false" />
+</template>`,
+
+  "editor-readonly": `<script setup lang="ts">
+import { ref } from "vue"
+import { JsonSchemaEditor } from "jsonschema-builder-vue"
+import type { JSONSchema } from "jsonschema-builder-vue"
+
+const schema = ref<JSONSchema>({
+  type: "object",
+  properties: {
+    email: { type: "string", format: "email" },
+    active: { type: "boolean" },
+  },
+})
+<\/script>
+
+<template>
+  <JsonSchemaEditor :schema="schema" :read-only="true" />
+</template>`,
+
+  "editor-nofs": `<script setup lang="ts">
+import { ref } from "vue"
+import { JsonSchemaEditor } from "jsonschema-builder-vue"
+import type { JSONSchema } from "jsonschema-builder-vue"
+
+const schema = ref<JSONSchema>({ type: "object", properties: {} })
+<\/script>
+
+<template>
+  <JsonSchemaEditor v-model:schema="schema" :show-fullscreen="false" />
+</template>`,
+
+  "editor-sync": `<script setup lang="ts">
+import { computed, ref } from "vue"
+import { JsonSchemaEditor } from "jsonschema-builder-vue"
+import type { JSONSchema } from "jsonschema-builder-vue"
+
+const schema = ref<JSONSchema>({ type: "object", properties: {} })
+const schemaText = computed(() => JSON.stringify(schema.value, null, 2))
+<\/script>
+
+<template>
+  <div class="grid grid-cols-2 gap-4">
+    <JsonSchemaEditor
+      v-model:schema="schema"
+      :show-json-editor="false"
+      :show-fullscreen="false"
+    />
+    <textarea :value="schemaText" readonly class="font-mono text-xs p-4 border rounded" />
+  </div>
+</template>`,
+
+  "infer-popup": `<script setup lang="ts">
+import { ref } from "vue"
+import { SchemaInferencer, JsonSchemaEditor } from "jsonschema-builder-vue"
+import type { JSONSchema } from "jsonschema-builder-vue"
+
+const schema = ref<JSONSchema>({ type: "object", properties: {} })
+const showDialog = ref(false)
+<\/script>
+
+<template>
+  <button @click="showDialog = true">Open Inferencer</button>
+
+  <SchemaInferencer
+    v-model:visible="showDialog"
+    @schema-inferred="schema = $event"
+  />
+
+  <!-- Show the inferred schema -->
+  <JsonSchemaEditor :schema="schema" :read-only="true" />
+</template>`,
+
+  "infer-inline": `<script setup lang="ts">
+import { ref } from "vue"
+import { SchemaInferencer, JsonSchemaEditor } from "jsonschema-builder-vue"
+import type { JSONSchema } from "jsonschema-builder-vue"
+
+const schema = ref<JSONSchema>({ type: "object", properties: {} })
+<\/script>
+
+<template>
+  <div class="grid grid-cols-2 gap-4">
+    <!-- Omit :visible to render inline -->
+    <SchemaInferencer @schema-inferred="schema = $event" />
+
+    <!-- Resulting schema -->
+    <JsonSchemaEditor
+      v-model:schema="schema"
+      :show-json-editor="false"
+      :show-fullscreen="false"
+    />
+  </div>
+</template>`,
+
+  "infer-util": `<script setup lang="ts">
+import { ref } from "vue"
+import { createSchemaFromJson } from "jsonschema-builder-vue"
+
+const input = ref('{ "name": "Alice", "age": 25, "active": true }')
+const output = ref("")
+
+function run() {
+  const obj = JSON.parse(input.value)
+  const schema = createSchemaFromJson(obj)
+  output.value = JSON.stringify(schema, null, 2)
+}
+<\/script>
+
+<template>
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <textarea v-model="input" class="w-full h-36 font-mono text-xs p-3 border rounded" />
+      <button @click="run">Run</button>
+    </div>
+    <pre class="h-36 overflow-auto font-mono text-xs p-3 border rounded">{{ output || "Press Run" }}</pre>
+  </div>
+</template>`,
+
+  "validator-popup": `<script setup lang="ts">
+import { ref } from "vue"
+import { JsonValidator } from "jsonschema-builder-vue"
+import type { JSONSchema } from "jsonschema-builder-vue"
+
+const schema = ref<JSONSchema>({
+  type: "object",
+  properties: {
+    name: { type: "string" },
+    age: { type: "number" },
+  },
+})
+
+const showDialog = ref(false)
+<\/script>
+
+<template>
+  <button @click="showDialog = true">Open Validator</button>
+  <JsonValidator v-model:visible="showDialog" :schema="schema" />
+</template>`,
+
+  "validator-inline": `<script setup lang="ts">
+import { ref } from "vue"
+import { JsonValidator } from "jsonschema-builder-vue"
+import type { JSONSchema } from "jsonschema-builder-vue"
+
+const schema = ref<JSONSchema>({
+  type: "object",
+  properties: {
+    name: { type: "string" },
+    age: { type: "number" },
+  },
+})
+<\/script>
+
+<template>
+  <!-- Omit :visible to render inline -->
+  <JsonValidator :schema="schema" />
+</template>`,
+
+  "validator-util": `<script setup lang="ts">
+import { ref } from "vue"
+import { validateJson } from "jsonschema-builder-vue"
+import type { JSONSchema } from "jsonschema-builder-vue"
+
+const schema: JSONSchema = {
+  type: "object",
+  properties: {
+    name: { type: "string" },
+    age: { type: "number" },
+  },
+}
+
+const input = ref('{ "name": "Bob", "age": "not a number" }')
+const output = ref("")
+
+function run() {
+  const result = validateJson(input.value, schema)
+  output.value = result.valid
+    ? "✓ Valid"
+    : result.errors?.map((e) => \`✗ \${e.path}: \${e.message}\`).join("\\n") ?? ""
+}
+<\/script>
+
+<template>
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <textarea v-model="input" class="w-full h-36 font-mono text-xs p-3 border rounded" />
+      <button @click="run">Validate</button>
+    </div>
+    <pre class="h-36 overflow-auto font-mono text-xs p-3 border rounded whitespace-pre-wrap">{{ output || "Press Validate" }}</pre>
+  </div>
+</template>`,
+
+  i18n: `<script setup lang="ts">
+import { ref } from "vue"
+import { JsonSchemaEditor, provideTranslation } from "jsonschema-builder-vue"
+import type { JSONSchema, Translation } from "jsonschema-builder-vue"
+import { en } from "jsonschema-builder-vue/i18n/locales/en"
+
+const schema = ref<JSONSchema>({ type: "object", properties: {} })
+
+// Create a reactive translation ref and provide it
+const translation = ref<Translation>(en)
+provideTranslation(translation)
+
+// Switch language dynamically
+async function switchLanguage(lang: string) {
+  const module = await import(\`jsonschema-builder-vue/i18n/locales/\${lang}\`)
+  translation.value = module[lang]
+}
+<\/script>
+
+<template>
+  <div class="flex gap-2 mb-4">
+    <button @click="switchLanguage('en')">English</button>
+    <button @click="switchLanguage('de')">Deutsch</button>
+    <button @click="switchLanguage('fr')">Français</button>
+    <button @click="switchLanguage('it')">Italiano</button>
+  </div>
+
+  <JsonSchemaEditor v-model:schema="schema" />
+</template>`,
+
+  theming: `<script setup lang="ts">
+import { ref } from "vue"
+import { JsonSchemaEditor, useTheme } from "jsonschema-builder-vue"
+import type { JSONSchema } from "jsonschema-builder-vue"
+
+const schema = ref<JSONSchema>({ type: "object", properties: {} })
+
+const {
+  currentPreset,
+  darkMode,
+  switchPreset,
+  toggleDarkMode,
+  presetNames,
+} = useTheme()
+<\/script>
+
+<template>
+  <div class="flex gap-2 mb-4">
+    <button
+      v-for="name in presetNames"
+      :key="name"
+      @click="switchPreset(name)"
+      :class="{ 'font-bold': currentPreset === name }"
+    >
+      {{ name }}
+    </button>
+  </div>
+
+  <button @click="toggleDarkMode()">
+    {{ darkMode ? '☀️ Light' : '🌙 Dark' }}
+  </button>
+
+  <JsonSchemaEditor v-model:schema="schema" />
+</template>`,
 };
 </script>
 
@@ -419,104 +658,53 @@ toggleDarkMode()`,
               </div>
             </div>
 
-            <!-- Use Cases -->
             <!-- Basic -->
             <div id="section-editor-basic" class="mb-10">
               <h3 class="text-base font-semibold text-gray-800 mb-1">Basic Usage</h3>
               <p class="text-sm text-gray-500 mb-3">The default configuration with both visual and JSON editor panels.</p>
-              <div class="rounded-xl border border-border/60 overflow-hidden shadow-xs bg-white" style="height:520px">
+              <DemoBlock :code="code['editor-basic']">
                 <JsonSchemaEditor :schema="schema" @update:schema="schema = $event" class="h-full" />
-              </div>
-              <div class="mt-3 rounded-xl border border-border/40 bg-gray-50/60 overflow-hidden">
-                <div class="flex items-center justify-between px-4 py-2 border-b border-border/30">
-                  <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Code</span>
-                  <button type="button" @click="copy(code['editor-basic'], 'editor-basic')"
-                    class="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors">
-                    <Check v-if="copiedId === 'editor-basic'" :size="12" class="text-green-500" /><Clipboard v-else :size="12" /> Copy
-                  </button>
-                </div>
-                <pre class="px-4 py-3 text-[13px] font-mono text-gray-700 leading-relaxed overflow-x-auto"><code>{{ code["editor-basic"] }}</code></pre>
-              </div>
+              </DemoBlock>
             </div>
 
             <!-- Visual Only -->
             <div id="section-editor-visual" class="mb-10">
               <h3 class="text-base font-semibold text-gray-800 mb-1">Visual Only</h3>
               <p class="text-sm text-gray-500 mb-3">Hide the JSON code panel — ideal for end-users who only need the visual builder.</p>
-              <div class="rounded-xl border border-border/60 overflow-hidden shadow-xs bg-white" style="height:470px">
+              <DemoBlock :code="code['editor-visual']">
                 <JsonSchemaEditor :schema="schema" @update:schema="schema = $event" :show-json-editor="false" class="h-full" />
-              </div>
-              <div class="mt-3 rounded-xl border border-border/40 bg-gray-50/60 overflow-hidden">
-                <div class="flex items-center justify-between px-4 py-2 border-b border-border/30">
-                  <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Code</span>
-                  <button type="button" @click="copy(code['editor-visual'], 'editor-visual')"
-                    class="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors">
-                    <Check v-if="copiedId === 'editor-visual'" :size="12" class="text-green-500" /><Clipboard v-else :size="12" /> Copy
-                  </button>
-                </div>
-                <pre class="px-4 py-3 text-[13px] font-mono text-gray-700 leading-relaxed overflow-x-auto"><code>{{ code["editor-visual"] }}</code></pre>
-              </div>
+              </DemoBlock>
             </div>
 
             <!-- Read-Only -->
             <div id="section-editor-readonly" class="mb-10">
               <h3 class="text-base font-semibold text-gray-800 mb-1">Read-Only</h3>
               <p class="text-sm text-gray-500 mb-3">Display a schema without allowing modifications.</p>
-              <div class="rounded-xl border border-border/60 overflow-hidden shadow-xs bg-white" style="height:470px">
+              <DemoBlock :code="code['editor-readonly']">
                 <JsonSchemaEditor :schema="schema" :read-only="true" class="h-full" />
-              </div>
-              <div class="mt-3 rounded-xl border border-border/40 bg-gray-50/60 overflow-hidden">
-                <div class="flex items-center justify-between px-4 py-2 border-b border-border/30">
-                  <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Code</span>
-                  <button type="button" @click="copy(code['editor-readonly'], 'editor-readonly')"
-                    class="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors">
-                    <Check v-if="copiedId === 'editor-readonly'" :size="12" class="text-green-500" /><Clipboard v-else :size="12" /> Copy
-                  </button>
-                </div>
-                <pre class="px-4 py-3 text-[13px] font-mono text-gray-700 leading-relaxed overflow-x-auto"><code>{{ code["editor-readonly"] }}</code></pre>
-              </div>
+              </DemoBlock>
             </div>
 
             <!-- No Fullscreen -->
             <div id="section-editor-nofs" class="mb-10">
               <h3 class="text-base font-semibold text-gray-800 mb-1">No Fullscreen Toggle</h3>
               <p class="text-sm text-gray-500 mb-3">Hide the fullscreen button for embedded layouts.</p>
-              <div class="rounded-xl border border-border/60 overflow-hidden shadow-xs bg-white" style="height:470px">
+              <DemoBlock :code="code['editor-nofs']">
                 <JsonSchemaEditor :schema="schema" @update:schema="schema = $event" :show-fullscreen="false" class="h-full" />
-              </div>
-              <div class="mt-3 rounded-xl border border-border/40 bg-gray-50/60 overflow-hidden">
-                <div class="flex items-center justify-between px-4 py-2 border-b border-border/30">
-                  <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Code</span>
-                  <button type="button" @click="copy(code['editor-nofs'], 'editor-nofs')"
-                    class="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors">
-                    <Check v-if="copiedId === 'editor-nofs'" :size="12" class="text-green-500" /><Clipboard v-else :size="12" /> Copy
-                  </button>
-                </div>
-                <pre class="px-4 py-3 text-[13px] font-mono text-gray-700 leading-relaxed overflow-x-auto"><code>{{ code["editor-nofs"] }}</code></pre>
-              </div>
+              </DemoBlock>
             </div>
 
             <!-- Textbox Sync -->
             <div id="section-editor-sync" class="mb-10">
               <h3 class="text-base font-semibold text-gray-800 mb-1">Textbox Sync</h3>
               <p class="text-sm text-gray-500 mb-3">A plain textarea mirrors every schema change via the <code class="text-xs bg-gray-100 px-1 py-0.5 rounded font-mono">update:schema</code> event.</p>
-              <div class="grid lg:grid-cols-2 gap-4">
-                <div class="rounded-xl border border-border/60 overflow-hidden shadow-xs bg-white" style="height:450px">
+              <DemoBlock :code="code['editor-sync']">
+                <div class="grid lg:grid-cols-2 gap-4 p-4 h-full">
                   <JsonSchemaEditor :schema="schema" @update:schema="schema = $event" :show-json-editor="false" :show-fullscreen="false" class="h-full" />
+                  <textarea :value="schemaText" readonly
+                    class="rounded-xl border border-border/60 bg-white p-4 text-xs font-mono text-gray-600 resize-none shadow-xs focus:outline-none h-full" />
                 </div>
-                <textarea :value="schemaText" readonly
-                  class="rounded-xl border border-border/60 bg-white p-4 text-xs font-mono text-gray-600 resize-none shadow-xs focus:outline-none h-[450px]" />
-              </div>
-              <div class="mt-3 rounded-xl border border-border/40 bg-gray-50/60 overflow-hidden">
-                <div class="flex items-center justify-between px-4 py-2 border-b border-border/30">
-                  <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Code</span>
-                  <button type="button" @click="copy(code['editor-sync'], 'editor-sync')"
-                    class="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors">
-                    <Check v-if="copiedId === 'editor-sync'" :size="12" class="text-green-500" /><Clipboard v-else :size="12" /> Copy
-                  </button>
-                </div>
-                <pre class="px-4 py-3 text-[13px] font-mono text-gray-700 leading-relaxed overflow-x-auto"><code>{{ code["editor-sync"] }}</code></pre>
-              </div>
+              </DemoBlock>
             </div>
           </section>
 
@@ -581,82 +769,60 @@ toggleDarkMode()`,
             <div id="section-infer-popup" class="mb-10">
               <h3 class="text-base font-semibold text-gray-800 mb-1">Popup Mode</h3>
               <p class="text-sm text-gray-500 mb-3">Open as a dialog, paste JSON, and get a schema back. The inferred schema feeds a separate read-only editor.</p>
-              <button type="button" @click="inferDialogOpen = true"
-                class="px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-medium hover:shadow-md hover:shadow-amber-500/20 transition-all mb-3">
-                Open Inferencer
-              </button>
-              <div v-if="Object.keys((inferPopupSchema as any).properties || {}).length"
-                class="rounded-xl border border-border/60 overflow-hidden shadow-xs bg-white" style="height:380px">
-                <JsonSchemaEditor :schema="inferPopupSchema" :read-only="true" class="h-full" />
-              </div>
-              <p v-else class="text-sm text-gray-400 italic">Inferred schema will appear here.</p>
-              <SchemaInferencer :visible="inferDialogOpen" @update:visible="inferDialogOpen = $event" @schema-inferred="inferPopupSchema = $event" />
-              <div class="mt-3 rounded-xl border border-border/40 bg-gray-50/60 overflow-hidden">
-                <div class="flex items-center justify-between px-4 py-2 border-b border-border/30">
-                  <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Code</span>
-                  <button type="button" @click="copy(code['infer-popup'], 'infer-popup')"
-                    class="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors">
-                    <Check v-if="copiedId === 'infer-popup'" :size="12" class="text-green-500" /><Clipboard v-else :size="12" /> Copy
+              <DemoBlock :code="code['infer-popup']">
+                <div class="p-4">
+                  <button type="button" @click="inferDialogOpen = true"
+                    class="px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-medium hover:shadow-md hover:shadow-amber-500/20 transition-all mb-3">
+                    Open Inferencer
                   </button>
+                  <div v-if="Object.keys((inferPopupSchema as any).properties || {}).length"
+                    class="rounded-xl border border-border/60 overflow-hidden shadow-xs bg-white" style="height:380px">
+                    <JsonSchemaEditor :schema="inferPopupSchema" :read-only="true" class="h-full" />
+                  </div>
+                  <p v-else class="text-sm text-gray-400 italic">Inferred schema will appear here.</p>
+                  <SchemaInferencer :visible="inferDialogOpen" @update:visible="inferDialogOpen = $event" @schema-inferred="inferPopupSchema = $event" />
                 </div>
-                <pre class="px-4 py-3 text-[13px] font-mono text-gray-700 leading-relaxed overflow-x-auto"><code>{{ code["infer-popup"] }}</code></pre>
-              </div>
+              </DemoBlock>
             </div>
 
             <!-- Inline -->
             <div id="section-infer-inline" class="mb-10">
               <h3 class="text-base font-semibold text-gray-800 mb-1">Inline Mode</h3>
               <p class="text-sm text-gray-500 mb-3">Omit <code class="text-xs bg-gray-100 px-1 py-0.5 rounded font-mono">:visible</code> to render inline. Here the inferred schema feeds a separate editor below.</p>
-              <div class="grid lg:grid-cols-2 gap-4">
-                <div>
-                  <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">1 — Paste JSON</p>
-                  <SchemaInferencer @schema-inferred="inferInlineSchema = $event" />
-                </div>
-                <div>
-                  <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">2 — Resulting schema</p>
-                  <div class="rounded-xl border border-border/60 overflow-hidden shadow-xs bg-white" style="height:368px">
-                    <JsonSchemaEditor :schema="inferInlineSchema" @update:schema="inferInlineSchema = $event" :show-json-editor="false" :show-fullscreen="false" class="h-full" />
+              <DemoBlock :code="code['infer-inline']">
+                <div class="grid lg:grid-cols-2 gap-4 p-4">
+                  <div>
+                    <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">1 — Paste JSON</p>
+                    <SchemaInferencer @schema-inferred="inferInlineSchema = $event" />
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">2 — Resulting schema</p>
+                    <div class="rounded-xl border border-border/60 overflow-hidden shadow-xs bg-white" style="height:368px">
+                      <JsonSchemaEditor :schema="inferInlineSchema" @update:schema="inferInlineSchema = $event" :show-json-editor="false" :show-fullscreen="false" class="h-full" />
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div class="mt-3 rounded-xl border border-border/40 bg-gray-50/60 overflow-hidden">
-                <div class="flex items-center justify-between px-4 py-2 border-b border-border/30">
-                  <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Code</span>
-                  <button type="button" @click="copy(code['infer-inline'], 'infer-inline')"
-                    class="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors">
-                    <Check v-if="copiedId === 'infer-inline'" :size="12" class="text-green-500" /><Clipboard v-else :size="12" /> Copy
-                  </button>
-                </div>
-                <pre class="px-4 py-3 text-[13px] font-mono text-gray-700 leading-relaxed overflow-x-auto"><code>{{ code["infer-inline"] }}</code></pre>
-              </div>
+              </DemoBlock>
             </div>
 
             <!-- Utility -->
             <div id="section-infer-util" class="mb-10">
               <h3 class="text-base font-semibold text-gray-800 mb-1">Utility Function</h3>
               <p class="text-sm text-gray-500 mb-3">A pure function — no Vue required. Pass any JS object, get a JSON Schema back.</p>
-              <div class="grid lg:grid-cols-2 gap-4">
-                <div>
-                  <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">Input (JSON)</p>
-                  <textarea v-model="utilInput" class="rounded-xl border border-border/60 bg-white p-3 text-xs font-mono resize-none w-full h-36 focus:outline-none shadow-xs" />
-                  <button type="button" @click="runInfer"
-                    class="mt-2 px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-medium hover:shadow-md transition-all">Run</button>
+              <DemoBlock :code="code['infer-util']" language="typescript">
+                <div class="grid lg:grid-cols-2 gap-4 p-4">
+                  <div>
+                    <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">Input (JSON)</p>
+                    <textarea v-model="utilInput" class="rounded-xl border border-border/60 bg-white p-3 text-xs font-mono resize-none w-full h-36 focus:outline-none shadow-xs" />
+                    <button type="button" @click="runInfer"
+                      class="mt-2 px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-medium hover:shadow-md transition-all">Run</button>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">Output (Schema)</p>
+                    <pre class="rounded-xl border border-border/60 bg-white p-3 text-xs font-mono h-36 overflow-auto shadow-xs">{{ utilOutput || 'Press Run' }}</pre>
+                  </div>
                 </div>
-                <div>
-                  <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">Output (Schema)</p>
-                  <pre class="rounded-xl border border-border/60 bg-white p-3 text-xs font-mono h-36 overflow-auto shadow-xs">{{ utilOutput || 'Press Run' }}</pre>
-                </div>
-              </div>
-              <div class="mt-3 rounded-xl border border-border/40 bg-gray-50/60 overflow-hidden">
-                <div class="flex items-center justify-between px-4 py-2 border-b border-border/30">
-                  <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Code</span>
-                  <button type="button" @click="copy(code['infer-util'], 'infer-util')"
-                    class="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors">
-                    <Check v-if="copiedId === 'infer-util'" :size="12" class="text-green-500" /><Clipboard v-else :size="12" /> Copy
-                  </button>
-                </div>
-                <pre class="px-4 py-3 text-[13px] font-mono text-gray-700 leading-relaxed overflow-x-auto"><code>{{ code["infer-util"] }}</code></pre>
-              </div>
+              </DemoBlock>
             </div>
           </section>
 
@@ -721,67 +887,47 @@ toggleDarkMode()`,
             <div id="section-validator-popup" class="mb-10">
               <h3 class="text-base font-semibold text-gray-800 mb-1">Popup Mode</h3>
               <p class="text-sm text-gray-500 mb-3">Open a dialog, paste JSON, and validate against the current schema.</p>
-              <button type="button" @click="validatorDialogOpen = true"
-                class="px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-sm font-medium hover:shadow-md hover:shadow-emerald-500/20 transition-all">
-                Open Validator
-              </button>
-              <p class="text-sm text-gray-400 mt-2">Validates against the schema from the editor above.</p>
-              <JsonValidator :visible="validatorDialogOpen" @update:visible="validatorDialogOpen = $event" :schema="schema" />
-              <div class="mt-3 rounded-xl border border-border/40 bg-gray-50/60 overflow-hidden">
-                <div class="flex items-center justify-between px-4 py-2 border-b border-border/30">
-                  <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Code</span>
-                  <button type="button" @click="copy(code['validator-popup'], 'validator-popup')"
-                    class="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors">
-                    <Check v-if="copiedId === 'validator-popup'" :size="12" class="text-green-500" /><Clipboard v-else :size="12" /> Copy
+              <DemoBlock :code="code['validator-popup']">
+                <div class="p-4">
+                  <button type="button" @click="validatorDialogOpen = true"
+                    class="px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-sm font-medium hover:shadow-md hover:shadow-emerald-500/20 transition-all">
+                    Open Validator
                   </button>
+                  <p class="text-sm text-gray-400 mt-2">Validates against the schema from the editor above.</p>
+                  <JsonValidator :visible="validatorDialogOpen" @update:visible="validatorDialogOpen = $event" :schema="schema" />
                 </div>
-                <pre class="px-4 py-3 text-[13px] font-mono text-gray-700 leading-relaxed overflow-x-auto"><code>{{ code["validator-popup"] }}</code></pre>
-              </div>
+              </DemoBlock>
             </div>
 
             <!-- Inline -->
             <div id="section-validator-inline" class="mb-10">
               <h3 class="text-base font-semibold text-gray-800 mb-1">Inline Mode</h3>
               <p class="text-sm text-gray-500 mb-3">Omit <code class="text-xs bg-gray-100 px-1 py-0.5 rounded font-mono">:visible</code> to render inline.</p>
-              <JsonValidator :schema="schema" />
-              <div class="mt-3 rounded-xl border border-border/40 bg-gray-50/60 overflow-hidden">
-                <div class="flex items-center justify-between px-4 py-2 border-b border-border/30">
-                  <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Code</span>
-                  <button type="button" @click="copy(code['validator-inline'], 'validator-inline')"
-                    class="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors">
-                    <Check v-if="copiedId === 'validator-inline'" :size="12" class="text-green-500" /><Clipboard v-else :size="12" /> Copy
-                  </button>
+              <DemoBlock :code="code['validator-inline']">
+                <div class="p-4">
+                  <JsonValidator :schema="schema" />
                 </div>
-                <pre class="px-4 py-3 text-[13px] font-mono text-gray-700 leading-relaxed overflow-x-auto"><code>{{ code["validator-inline"] }}</code></pre>
-              </div>
+              </DemoBlock>
             </div>
 
             <!-- Utility -->
             <div id="section-validator-util" class="mb-10">
               <h3 class="text-base font-semibold text-gray-800 mb-1">Utility Function</h3>
               <p class="text-sm text-gray-500 mb-3">Pure function — no Vue required. Returns structured errors with paths and line numbers.</p>
-              <div class="grid lg:grid-cols-2 gap-4">
-                <div>
-                  <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">Input</p>
-                  <textarea v-model="validUtilInput" class="rounded-xl border border-border/60 bg-white p-3 text-xs font-mono resize-none w-full h-36 focus:outline-none shadow-xs" />
-                  <button type="button" @click="runValidate"
-                    class="mt-2 px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-sm font-medium hover:shadow-md transition-all">Validate</button>
+              <DemoBlock :code="code['validator-util']" language="typescript">
+                <div class="grid lg:grid-cols-2 gap-4 p-4">
+                  <div>
+                    <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">Input</p>
+                    <textarea v-model="validUtilInput" class="rounded-xl border border-border/60 bg-white p-3 text-xs font-mono resize-none w-full h-36 focus:outline-none shadow-xs" />
+                    <button type="button" @click="runValidate"
+                      class="mt-2 px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-sm font-medium hover:shadow-md transition-all">Validate</button>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">Result</p>
+                    <pre class="rounded-xl border border-border/60 bg-white p-3 text-xs font-mono h-36 overflow-auto whitespace-pre-wrap shadow-xs">{{ validUtilOutput || 'Press Validate' }}</pre>
+                  </div>
                 </div>
-                <div>
-                  <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">Result</p>
-                  <pre class="rounded-xl border border-border/60 bg-white p-3 text-xs font-mono h-36 overflow-auto whitespace-pre-wrap shadow-xs">{{ validUtilOutput || 'Press Validate' }}</pre>
-                </div>
-              </div>
-              <div class="mt-3 rounded-xl border border-border/40 bg-gray-50/60 overflow-hidden">
-                <div class="flex items-center justify-between px-4 py-2 border-b border-border/30">
-                  <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Code</span>
-                  <button type="button" @click="copy(code['validator-util'], 'validator-util')"
-                    class="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors">
-                    <Check v-if="copiedId === 'validator-util'" :size="12" class="text-green-500" /><Clipboard v-else :size="12" /> Copy
-                  </button>
-                </div>
-                <pre class="px-4 py-3 text-[13px] font-mono text-gray-700 leading-relaxed overflow-x-auto"><code>{{ code["validator-util"] }}</code></pre>
-              </div>
+              </DemoBlock>
             </div>
           </section>
 
@@ -804,35 +950,27 @@ toggleDarkMode()`,
               Provide a <code class="text-xs bg-gray-100 px-1 py-0.5 rounded font-mono">Ref&lt;Translation&gt;</code> and change its value to switch languages at runtime.
             </p>
 
-            <div class="mb-4">
-              <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">Available Locales</p>
-              <div class="flex flex-wrap gap-2">
-                <button v-for="lang in langs" :key="lang.value" type="button" @click="switchLang(lang.value)"
-                  :class="[
-                    'px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all',
-                    currentLang === lang.value
-                      ? 'bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-md shadow-violet-500/20'
-                      : 'bg-white border border-border/60 text-gray-600 hover:bg-gray-50 hover:shadow-xs'
-                  ]">
-                  {{ lang.label }}
-                </button>
+            <DemoBlock :code="code.i18n">
+              <div class="p-4">
+                <div class="mb-4">
+                  <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">Available Locales</p>
+                  <div class="flex flex-wrap gap-2">
+                    <button v-for="lang in langs" :key="lang.value" type="button" @click="switchLang(lang.value)"
+                      :class="[
+                        'px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all',
+                        currentLang === lang.value
+                          ? 'bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-md shadow-violet-500/20'
+                          : 'bg-white border border-border/60 text-gray-600 hover:bg-gray-50 hover:shadow-xs'
+                      ]">
+                      {{ lang.label }}
+                    </button>
+                  </div>
+                </div>
+                <div class="rounded-xl border border-border/60 overflow-hidden shadow-xs bg-white" style="height:380px">
+                  <JsonSchemaEditor :schema="schema" @update:schema="schema = $event" class="h-full" />
+                </div>
               </div>
-            </div>
-
-            <div class="rounded-xl border border-border/60 overflow-hidden shadow-xs bg-white" style="height:480px">
-              <JsonSchemaEditor :schema="schema" @update:schema="schema = $event" class="h-full" />
-            </div>
-
-            <div class="mt-3 rounded-xl border border-border/40 bg-gray-50/60 overflow-hidden">
-              <div class="flex items-center justify-between px-4 py-2 border-b border-border/30">
-                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Code</span>
-                <button type="button" @click="copy(code.i18n, 'i18n')"
-                  class="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors">
-                  <Check v-if="copiedId === 'i18n'" :size="12" class="text-green-500" /><Clipboard v-else :size="12" /> Copy
-                </button>
-              </div>
-              <pre class="px-4 py-3 text-[13px] font-mono text-gray-700 leading-relaxed overflow-x-auto"><code>{{ code.i18n }}</code></pre>
-            </div>
+            </DemoBlock>
           </section>
 
           <hr class="border-border/30" />
@@ -853,50 +991,43 @@ toggleDarkMode()`,
               reactive state for the active preset and dark mode.
             </p>
 
-            <div class="mb-4">
-              <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">Preset</p>
-              <div class="flex flex-wrap gap-2">
-                <button v-for="name in presetNames" :key="name" type="button" @click="switchPreset(name)"
-                  :class="[
-                    'px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all capitalize',
-                    currentPreset === name
-                      ? 'bg-gradient-to-r from-pink-500 to-rose-600 text-white shadow-md shadow-pink-500/20'
-                      : 'bg-white border border-border/60 text-gray-600 hover:bg-gray-50 hover:shadow-xs'
-                  ]">
-                  {{ presetLabels[name] }}
-                </button>
+            <DemoBlock :code="code.theming">
+              <div class="p-4">
+                <div class="mb-4">
+                  <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">Preset</p>
+                  <div class="flex flex-wrap gap-2">
+                    <button v-for="name in presetNames" :key="name" type="button" @click="switchPreset(name)"
+                      :class="[
+                        'px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all capitalize',
+                        currentPreset === name
+                          ? 'bg-gradient-to-r from-pink-500 to-rose-600 text-white shadow-md shadow-pink-500/20'
+                          : 'bg-white border border-border/60 text-gray-600 hover:bg-gray-50 hover:shadow-xs'
+                      ]">
+                      {{ presetLabels[name] }}
+                    </button>
+                  </div>
+                </div>
+
+                <div class="mb-4">
+                  <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">Dark Mode</p>
+                  <button type="button" @click="toggleDarkMode()"
+                    :class="[
+                      'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all',
+                      darkMode
+                        ? 'bg-gray-800 text-yellow-300 shadow-md'
+                        : 'bg-white border border-border/60 text-gray-600 hover:bg-gray-50 hover:shadow-xs'
+                    ]">
+                    <Moon v-if="darkMode" :size="14" />
+                    <Sun v-else :size="14" />
+                    {{ darkMode ? 'Dark' : 'Light' }}
+                  </button>
+                </div>
+
+                <div class="rounded-xl border border-border/60 overflow-hidden shadow-xs bg-white" style="height:350px">
+                  <JsonSchemaEditor :schema="schema" @update:schema="schema = $event" class="h-full" />
+                </div>
               </div>
-            </div>
-
-            <div class="mb-6">
-              <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">Dark Mode</p>
-              <button type="button" @click="toggleDarkMode()"
-                :class="[
-                  'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all',
-                  darkMode
-                    ? 'bg-gray-800 text-yellow-300 shadow-md'
-                    : 'bg-white border border-border/60 text-gray-600 hover:bg-gray-50 hover:shadow-xs'
-                ]">
-                <Moon v-if="darkMode" :size="14" />
-                <Sun v-else :size="14" />
-                {{ darkMode ? 'Dark' : 'Light' }}
-              </button>
-            </div>
-
-            <div class="rounded-xl border border-border/60 overflow-hidden shadow-xs bg-white" style="height:480px">
-              <JsonSchemaEditor :schema="schema" @update:schema="schema = $event" class="h-full" />
-            </div>
-
-            <div class="mt-3 rounded-xl border border-border/40 bg-gray-50/60 overflow-hidden">
-              <div class="flex items-center justify-between px-4 py-2 border-b border-border/30">
-                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Code</span>
-                <button type="button" @click="copy(code.theming, 'theming')"
-                  class="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors">
-                  <Check v-if="copiedId === 'theming'" :size="12" class="text-green-500" /><Clipboard v-else :size="12" /> Copy
-                </button>
-              </div>
-              <pre class="px-4 py-3 text-[13px] font-mono text-gray-700 leading-relaxed overflow-x-auto"><code>{{ code.theming }}</code></pre>
-            </div>
+            </DemoBlock>
           </section>
 
           <!-- Footer -->
