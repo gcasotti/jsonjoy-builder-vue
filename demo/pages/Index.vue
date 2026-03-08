@@ -9,8 +9,11 @@ import {
   Globe,
   Layers,
   Menu,
+  Moon,
   Package,
+  Palette,
   Sparkles,
+  Sun,
   Zap,
 } from "lucide-vue-next";
 import { computed, nextTick, ref } from "vue";
@@ -20,12 +23,23 @@ import JsonSchemaEditor from "../../src/components/SchemaEditor/JsonSchemaEditor
 import { en } from "../../src/i18n/locales/en.ts";
 import { provideTranslation } from "../../src/i18n/translation-context.ts";
 import type { Translation } from "../../src/i18n/translation-keys.ts";
+import type { PresetName } from "../../src/themes/presets.ts";
+import { useTheme } from "../../src/themes/useTheme.ts";
 import type { JSONSchema } from "../../src/types/jsonSchema.ts";
 import { exampleSchema } from "../utils/schemaExample.ts";
 
 // ── Reactive translation ──
 const translation = ref<Translation>(en);
 provideTranslation(translation);
+
+// ── Theme ──
+const { currentPreset, darkMode, switchPreset, toggleDarkMode, presetNames } = useTheme();
+const presetLabels: Record<PresetName, string> = {
+  aura: 'Aura',
+  material: 'Material',
+  nora: 'Nora',
+  lara: 'Lara',
+};
 
 // ── State ──
 const schema = ref<JSONSchema>(exampleSchema);
@@ -77,6 +91,7 @@ const nav: NavItem[] = [
     ],
   },
   { id: "i18n", label: "Localization", icon: Globe },
+  { id: "theming", label: "Theming", icon: Palette },
 ];
 
 const active = ref("editor");
@@ -256,11 +271,20 @@ import { de } from 'jsonschema-builder-vue/i18n/locales/de'
 const lang = ref(en)
 provideTranslation(lang)
 lang.value = de  // all labels update instantly`,
+  theming: `import { useTheme } from 'jsonschema-builder-vue'
+
+const { switchPreset, toggleDarkMode, currentPreset, darkMode } = useTheme()
+
+// Switch to Material Design theme
+switchPreset('material')
+
+// Toggle dark mode
+toggleDarkMode()`,
 };
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#fafbfd] jsonjoy font-sans">
+  <div class="min-h-screen bg-[#fafbfd] jscb font-sans">
 
     <!-- ───────── Hero ───────── -->
     <header class="relative overflow-hidden border-b border-border/30">
@@ -808,6 +832,70 @@ lang.value = de  // all labels update instantly`,
                 </button>
               </div>
               <pre class="px-4 py-3 text-[13px] font-mono text-gray-700 leading-relaxed overflow-x-auto"><code>{{ code.i18n }}</code></pre>
+            </div>
+          </section>
+
+          <hr class="border-border/30" />
+
+          <!-- ╔══════════════════════════════╗ -->
+          <!-- ║     Theming                   ║ -->
+          <!-- ╚══════════════════════════════╝ -->
+          <section id="section-theming">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="h-8 w-8 rounded-lg bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center">
+                <Palette :size="16" class="text-white" />
+              </div>
+              <h2 class="text-xl font-bold text-gray-900">Theming</h2>
+            </div>
+            <p class="text-gray-500 mb-6 leading-relaxed">
+              Switch between built-in PrimeVue presets at runtime and toggle dark mode.
+              The <code class="text-xs bg-gray-100 px-1 py-0.5 rounded font-mono">useTheme</code> composable provides
+              reactive state for the active preset and dark mode.
+            </p>
+
+            <div class="mb-4">
+              <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">Preset</p>
+              <div class="flex flex-wrap gap-2">
+                <button v-for="name in presetNames" :key="name" type="button" @click="switchPreset(name)"
+                  :class="[
+                    'px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all capitalize',
+                    currentPreset === name
+                      ? 'bg-gradient-to-r from-pink-500 to-rose-600 text-white shadow-md shadow-pink-500/20'
+                      : 'bg-white border border-border/60 text-gray-600 hover:bg-gray-50 hover:shadow-xs'
+                  ]">
+                  {{ presetLabels[name] }}
+                </button>
+              </div>
+            </div>
+
+            <div class="mb-6">
+              <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">Dark Mode</p>
+              <button type="button" @click="toggleDarkMode()"
+                :class="[
+                  'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all',
+                  darkMode
+                    ? 'bg-gray-800 text-yellow-300 shadow-md'
+                    : 'bg-white border border-border/60 text-gray-600 hover:bg-gray-50 hover:shadow-xs'
+                ]">
+                <Moon v-if="darkMode" :size="14" />
+                <Sun v-else :size="14" />
+                {{ darkMode ? 'Dark' : 'Light' }}
+              </button>
+            </div>
+
+            <div class="rounded-xl border border-border/60 overflow-hidden shadow-xs bg-white" style="height:480px">
+              <JsonSchemaEditor :schema="schema" @update:schema="schema = $event" class="h-full" />
+            </div>
+
+            <div class="mt-3 rounded-xl border border-border/40 bg-gray-50/60 overflow-hidden">
+              <div class="flex items-center justify-between px-4 py-2 border-b border-border/30">
+                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Code</span>
+                <button type="button" @click="copy(code.theming, 'theming')"
+                  class="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors">
+                  <Check v-if="copiedId === 'theming'" :size="12" class="text-green-500" /><Clipboard v-else :size="12" /> Copy
+                </button>
+              </div>
+              <pre class="px-4 py-3 text-[13px] font-mono text-gray-700 leading-relaxed overflow-x-auto"><code>{{ code.theming }}</code></pre>
             </div>
           </section>
 

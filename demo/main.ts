@@ -1,4 +1,4 @@
-import Aura from "@primevue/themes/aura";
+import { auraPreset } from "../src/themes/presets.ts";
 import PrimeVue from "primevue/config";
 import Tooltip from "primevue/tooltip";
 import { createApp } from "vue";
@@ -25,7 +25,10 @@ const router = createRouter({
 const app = createApp(App);
 app.use(PrimeVue, {
   theme: {
-    preset: Aura,
+    preset: auraPreset,
+    options: {
+      darkModeSelector: ".jscb-dark",
+    },
   },
 });
 app.directive("tooltip", Tooltip);
