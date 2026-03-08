@@ -47,7 +47,7 @@ describe("Schema Interactions", () => {
           },
         },
       };
-      const { wrapper, store } = mountWithStore(SchemaVisualEditor, {
+      const { store } = mountWithStore(SchemaVisualEditor, {
         storeSchema: schema,
       });
 

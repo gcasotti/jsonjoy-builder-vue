@@ -84,7 +84,7 @@ describe("TypeDropdown", () => {
     // Check that the component is disabled via HTML attribute or PrimeVue class
     expect(
       selectEl.attributes("aria-disabled") === "true" ||
-      selectEl.classes().some(c => c.includes("disabled"))
+        selectEl.classes().some((c) => c.includes("disabled")),
     ).toBe(true);
   });
 
