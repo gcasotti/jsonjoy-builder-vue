@@ -3,6 +3,7 @@ import { CheckCircle, Loader2, XCircle } from "lucide-vue-next";
 import { computed, ref, watch } from "vue";
 import Button from "../../components/ui/Button.vue";
 import Dialog from "../../components/ui/Dialog.vue";
+// biome-ignore lint/style/useImportType: Vue template needs the runtime component import
 import MonacoEditor from "../../components/ui/MonacoEditor.vue";
 import { useTranslation } from "../../hooks/use-translation.ts";
 import type { JSONSchema } from "../../types/jsonSchema.ts";
