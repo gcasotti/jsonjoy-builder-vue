@@ -133,8 +133,7 @@ By default, the editor uses English. To localize, use `provideTranslation` in a 
 ```vue
 <script setup lang="ts">
 import "jsonschema-builder-vue/styles.css";
-import { type JSONSchema, SchemaVisualEditor, provideTranslation } from "jsonschema-builder-vue";
-import { de } from "jsonschema-builder-vue/i18n/locales/de";
+import { type JSONSchema, SchemaVisualEditor, provideTranslation, de } from "jsonschema-builder-vue";
 import { ref } from "vue";
 
 const lang = ref(de);
@@ -159,6 +158,57 @@ const es: Translation = {
 ```
 
 See also the [English localizations file](https://github.com/gcasotti/jsonschema-builder-vue/blob/main/src/i18n/locales/en.ts) for the default localizations.
+
+### Monaco Editor (optional)
+
+The `JsonSchemaEditor`, `JsonSchemaVisualizer`, `JsonValidator`, and `SchemaInferencer` components include an embedded [Monaco Editor](https://microsoft.github.io/monaco-editor/) for JSON editing. Monaco is an **optional peer dependency** — you only need it if you use those components.
+
+> **If you only use `SchemaVisualEditor`, you do NOT need Monaco.**
+
+#### 1. Install
+
+```bash
+npm install monaco-editor
+```
+
+#### 2. Configure workers
+
+Monaco requires web workers to function. Configure them **once** in your app's entry point:
+
+**Vite:**
+
+```ts
+// main.ts
+import EditorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
+import JsonWorker from "monaco-editor/esm/vs/language/json/json.worker?worker";
+
+(self as any).MonacoEnvironment = {
+  getWorker(_workerId: string, label: string) {
+    if (label === "json") return new JsonWorker();
+    return new EditorWorker();
+  },
+};
+```
+
+**Webpack 5:**
+
+```ts
+// main.ts
+(self as any).MonacoEnvironment = {
+  getWorker(_workerId: string, label: string) {
+    if (label === "json") {
+      return new Worker(
+        new URL("monaco-editor/esm/vs/language/json/json.worker.js", import.meta.url),
+      );
+    }
+    return new Worker(
+      new URL("monaco-editor/esm/vs/editor/editor.worker.js", import.meta.url),
+    );
+  },
+};
+```
+
+That's it — the library handles everything else automatically.
 
 ### Development
 
@@ -220,8 +270,8 @@ Validate any JSON document against your schema with:
 - **Vue 3**: UI framework (Composition API, `<script setup>`)
 - **PrimeVue**: Component library with built-in theming (Aura, Material, Nora, Lara presets)
 - **TypeScript**: Type-safe development
-- **Rsbuild** / **Rslib**: Build tool and development server
-- **Monaco Editor**: Code editor for JSON viewing/editing
+- **Vite**: Build tool (library mode) and development server
+- **Monaco Editor**: Code editor for JSON viewing/editing (optional peer dependency, lazy-loaded)
 - **Ajv**: JSON Schema validation
 - **Zod**: Type-safe json parsing in ts
 - **Lucide Vue Next**: Icon library

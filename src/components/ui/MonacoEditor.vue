@@ -14,6 +14,9 @@
  * the bundle at the top level. Consumers who never render this component
  * will never trigger the import.
  *
+ * NOTE: The consumer is responsible for configuring Monaco web workers
+ * (via `self.MonacoEnvironment`). See README for setup instructions.
+ *
  * Usage:
  *   <MonacoEditor v-model="jsonText" language="json" />
  */
@@ -36,6 +39,7 @@ const emit = defineEmits<{
 }>();
 
 const editorContainer = ref<HTMLDivElement | null>(null);
+const loadError = ref(false);
 const {
   currentTheme,
   defineMonacoThemes,
@@ -54,7 +58,18 @@ let lastSetValue = "";
 onMounted(async () => {
   if (!editorContainer.value) return;
 
-  const monaco = await import("monaco-editor");
+  let monaco: typeof MonacoNS;
+  try {
+    monaco = await import("monaco-editor");
+  } catch (e) {
+    console.warn(
+      "[jsonschema-builder-vue] monaco-editor could not be loaded. " +
+        "Install it with: npm install monaco-editor",
+      e,
+    );
+    loadError.value = true;
+    return;
+  }
 
   defineMonacoThemes(monaco);
   configureJsonDefaults(monaco);
@@ -123,5 +138,8 @@ defineExpose({ layout });
 </script>
 
 <template>
-  <div ref="editorContainer" class="w-full h-full" />
+  <div v-if="loadError" class="w-full h-full flex items-center justify-center text-muted-foreground text-sm p-4">
+    <p>Monaco Editor not available. Install <code>monaco-editor</code> to enable the JSON editor.</p>
+  </div>
+  <div v-else ref="editorContainer" class="w-full h-full" />
 </template>
